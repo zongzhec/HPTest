@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import foo.zongzhe.hpresearch.action.DirectoryAction;
+import foo.zongzhe.hpresearch.action.LogAction;
 import foo.zongzhe.hpresearch.view.PreWelcomeView;
 import foo.zongzhe.hpresearch.view.WelcomeView;
 
@@ -20,12 +21,23 @@ public class StartingPoint {
 	public static void main(String[] args) {
 
 		/**
-		 * ----------------------- 准备阶段 -----------------------
+		 * ----------------------- Initialization Phase -----------------------
 		 */
-		// 准备阶段的变量
-		SimpleDateFormat df = new SimpleDateFormat("yyyy_MM_dd");// 设置日期格式
+		// Variables in the initialization phase
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");// Set date
+																// format
 		String sysTime = df.format(new Date()).toString();
 		System.out.println(sysTime);// new Date()为获取当前系统时间
+
+		// Check required directory and start to log
+		DirectoryAction da = new DirectoryAction();
+		File dir = new File("C:/hpresearch/");
+		if (!da.whetherDirectoryExists(dir)) {
+			da.createDir(dir);
+		}
+
+		LogAction la = new LogAction();
+		la.logStd(sysTime, "Link Start!");
 		INPUT_PATH_TEXT[0] = "C:/hptest/input/text/position_point_group1.txt";
 		INPUT_PATH_TEXT[1] = "C:/hptest/input/text/position_point_group2.txt";
 		INPUT_PATH_TEXT[2] = "C:/hptest/input/text/position_point_group3.txt";
@@ -41,7 +53,7 @@ public class StartingPoint {
 		while (itWorks) {
 
 			// 检查输入的文本是否存在，若不存在，则报错后退出
-			DirectoryAction da = new DirectoryAction();
+//			DirectoryAction da = new DirectoryAction();
 			for (int i = 0; i < NUMBER_OF_GROUP; i++) {
 				File inputText = new File(INPUT_PATH_TEXT[i]);
 				if (!da.whetherDirectoryExists(inputText)) {

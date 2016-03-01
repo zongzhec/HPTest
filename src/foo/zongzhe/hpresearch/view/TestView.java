@@ -419,7 +419,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	private void calVeriticalAngle() {
 		// TODO 计算点两两相连后和中心线的夹角
 		for (int i = 0; i < ANGLE_NUMBER_ALL; i++) {
-			asdasd
+			// Do something
 		}
 		// dotsPRadiusGroupOne  resultAngleGroupOne
 
