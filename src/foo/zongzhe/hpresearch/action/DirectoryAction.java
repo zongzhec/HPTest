@@ -6,7 +6,7 @@ public class DirectoryAction {
 
 	public boolean whetherDirectoryExists(File dir) {
 
-		System.out.println("Dir is: " + dir);
+//		System.out.println("Dir is: " + dir);
 		if (!dir.exists() && !dir.isDirectory()) {
 			System.out.println("²»´æÔÚ");
 			return false;

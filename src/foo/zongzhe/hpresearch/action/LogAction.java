@@ -3,15 +3,24 @@ package foo.zongzhe.hpresearch.action;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class LogAction {
 
-	public void logStd(String timestamp, String content) {
+	public void logStd(String logCate, String content) {
 		// Log into std file
 		try {
 			// 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件
-			String fileName = "C:/hpresearch/hptest" + timestamp + ".out";
+			// Set time format
+			SimpleDateFormat dfFileName = new SimpleDateFormat("yyyyMMdd");
+			SimpleDateFormat dfLogStamp = new SimpleDateFormat("HH:mm:ss");
+			// new Date()为获取当前系统时间
+			String sysTimeFileName = dfFileName.format(new Date()).toString();
+			String sysTimeLogStamp = dfLogStamp.format(new Date()).toString();
+			String fileName = "C:/hpresearch/hptest" + sysTimeFileName + ".out";
 			FileWriter writer = new FileWriter(fileName, true);
+			content = sysTimeLogStamp + ": -" + logCate + "- " + content + "\n";
 			writer.write(content);
 			writer.close();
 		} catch (IOException e) {
@@ -20,7 +29,7 @@ public class LogAction {
 
 	}
 
-	public  void logErr(String timestamp, String content) {
+	public void logErr(String timestamp, String content) {
 		// Log into std file
 		try {
 			// 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件

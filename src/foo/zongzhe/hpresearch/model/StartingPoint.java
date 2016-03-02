@@ -1,9 +1,6 @@
 package foo.zongzhe.hpresearch.model;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import foo.zongzhe.hpresearch.action.DirectoryAction;
 import foo.zongzhe.hpresearch.action.LogAction;
 import foo.zongzhe.hpresearch.view.PreWelcomeView;
@@ -16,18 +13,13 @@ public class StartingPoint {
 
 	public static String INPUT_PATH_TEXT[] = new String[3];
 
-	// static File inputText = new File(INPUT_PATH_TEXT);
-
 	public static void main(String[] args) {
 
 		/**
 		 * ----------------------- Initialization Phase -----------------------
 		 */
 		// Variables in the initialization phase
-		SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");// Set date
-																// format
-		String sysTime = df.format(new Date()).toString();
-		System.out.println(sysTime);// new Date()为获取当前系统时间
+		
 
 		// Check required directory and start to log
 		DirectoryAction da = new DirectoryAction();
@@ -37,7 +29,7 @@ public class StartingPoint {
 		}
 
 		LogAction la = new LogAction();
-		la.logStd(sysTime, "Link Start!");
+		la.logStd("Info", "Link Start!");
 		INPUT_PATH_TEXT[0] = "C:/hptest/input/text/position_point_group1.txt";
 		INPUT_PATH_TEXT[1] = "C:/hptest/input/text/position_point_group2.txt";
 		INPUT_PATH_TEXT[2] = "C:/hptest/input/text/position_point_group3.txt";
@@ -71,7 +63,7 @@ public class StartingPoint {
 		if (!itWorks) {
 			switch (errorCode) {
 			case ERROR_CODE_INPUT_FILE_NOT_EXIST:
-				System.out.println("指定的输入文件并不存在，请检查文件并重启此程序");
+				la.logStd("ERROR", "指定的输入文件并不存在，请检查文件并重启此程序!");
 				preWelView.setVisible(false);
 				System.exit(0);
 				break;
