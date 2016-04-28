@@ -18,7 +18,7 @@ public class LogAction {
 			// new Date()为获取当前系统时间
 			String sysTimeFileName = dfFileName.format(new Date()).toString();
 			String sysTimeLogStamp = dfLogStamp.format(new Date()).toString();
-			String fileName = "C:/hpresearch/hptest" + sysTimeFileName + ".out";
+			String fileName = "C:/hptest/output/log_file/" + sysTimeFileName + ".out";
 			FileWriter writer = new FileWriter(fileName, true);
 			content = sysTimeLogStamp + ": -" + logCate + "- " + content + "\n";
 			writer.write(content);

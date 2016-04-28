@@ -13,6 +13,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -25,6 +29,7 @@ import javax.swing.JTextField;
 import foo.zongzhe.hpresearch.action.AngleCalAction;
 import foo.zongzhe.hpresearch.action.DirectoryAction;
 import foo.zongzhe.hpresearch.action.FileIOAction;
+import foo.zongzhe.hpresearch.action.LogAction;
 
 public class TestView extends JFrame implements ActionListener, KeyListener {
 
@@ -56,90 +61,272 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	// 全局变量
 	int testerCount;
 	int testCount = 0;
-	final int TEST_PER_GROUP = 5;
-	final int GROUP_NUMBER = 1;
-	final int FULL_TEST_AMOUNT = TEST_PER_GROUP * GROUP_NUMBER;
-	final int IMAGE_WIDTH = 600;
-	final int IMAGE_HEGHT = 600;
-	final int RIGHR_PANEL_WIDTH = 400;
-	final int DOTS = 4;
-	final int PICS = 5;
-	final int ANGLE_NUMBER_ALL = DOTS * (DOTS - 1) / 2; // 结果的角度总数，4个点的话就是6个。每张图。
+	// 每组里面抽选多少张图
+	static final int PIC_PER_GROUP = 5;
+	static final int PIC_PER_GROUP_UAT = 5;
+	// 有多少个组
+	static final int GROUPS = 3;
+	static final int GROUPS_UAT = 1;
+	// 所有组合计共有多少图
+	static final int FULL_TEST_AMOUNT = PIC_PER_GROUP * GROUPS;
+	static final int FULL_TEST_AMOUNT_UAT = PIC_PER_GROUP_UAT * GROUPS_UAT;
+	// 图片的宽和高
+	static final int IMAGE_WIDTH = 600;
+	static final int IMAGE_HEGHT = 600;
+	static final int RIGHR_PANEL_WIDTH = 400;
+	// 每张图里有几个点
+	static final int DOTS = 5;
+	static final int DOTS_UAT = 5;
+	static final int PICS = 5;
+	// 结果的角度总数，5个点的话就是10个。每张图。
+	static final int ANGLES = DOTS * (DOTS - 1) / 2;
+
+	// 每组随机抽到的图片编号，对应每一组
+	static int chosenPic[][] = new int[GROUPS][PIC_PER_GROUP];
+	static List<Integer> chosenPicPerGroup = new ArrayList<Integer>();
+
+	// 输入的X，Y点坐标，对应每一组，每张图，每个点
+	static Double inputX[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
+	static Double inputY[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
+	// 每张图的旋转角度
+	static Double radian[][] = new Double[GROUPS][PIC_PER_GROUP];
+	// 输入的X，Y点坐标转换后对应的极坐标，对应每一组，每张图，每个点
+	static Double inputP[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
+	static Double inputRa[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
+	// 输出的X，Y点坐标，对应每一组，每张图，每个点
+	static Double outputX[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
+	static Double outputY[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
+	// 最终的角度，对应每一组，每张图，每个角度
+	static Double finalAngle[][][] = new Double[GROUPS][PIC_PER_GROUP][ANGLES];
+	static String finalAngleStr[][][] = new String[GROUPS][PIC_PER_GROUP][ANGLES];
 
 	static int group = 0; // 记录当前是在测试第几组
 	static int pic = 0; // 记录当前是在测试组里的第几个图
-	// 测试第一组：每组7张图片，每张图片4个点。
-	Double dotsXInputGroupOne[][] = new Double[TEST_PER_GROUP][DOTS * PICS];
-	Double dotsYInputGroupOne[][] = new Double[TEST_PER_GROUP][DOTS * PICS];
+	// 测试第一组，对应每张图，每个点
+	Double dotsXInputGroupOne[][] = new Double[PIC_PER_GROUP][DOTS];
+	Double dotsXInputGroupTwo[][] = new Double[PIC_PER_GROUP][DOTS];
+	Double dotsXInputGroupThree[][] = new Double[PIC_PER_GROUP][DOTS];
+	Double dotsYInputGroupOne[][] = new Double[PIC_PER_GROUP][DOTS];
 	// 测试里面的坐标使用极坐标存储
-	Double dotsPRadiusGroupOne[][] = new Double[TEST_PER_GROUP][DOTS * PICS];
-	Double dotsPAngleGroupOne[][] = new Double[TEST_PER_GROUP][DOTS * PICS];
+	Double dotsPRadiusGroupOne[][] = new Double[PIC_PER_GROUP][DOTS * PICS];
+	Double dotsPAngleGroupOne[][] = new Double[PIC_PER_GROUP][DOTS * PICS];
 
 	// 图片文件位置
-	String inputPathImageGroup[][] = new String[GROUP_NUMBER][TEST_PER_GROUP];
-	String INPUT_PATH_TEXT[] = new String[3];
+	String inputPathImageGroup[][] = new String[GROUPS][PIC_PER_GROUP];
 
 	// String ImageNumber[][] = new String[GROUP_NUMBER][TEST_PER_GROUP];
-	Image image[][] = new Image[GROUP_NUMBER][TEST_PER_GROUP];
+	Image image[][] = new Image[GROUPS][PIC_PER_GROUP];
 	// 存放图片中旋转角度信息
-	Double rotateAngle[][] = new Double[GROUP_NUMBER][TEST_PER_GROUP];
+	Double rotateAngle[][] = new Double[GROUPS][PIC_PER_GROUP];
 
 	// 存放结果的角度
-	Double resultAngleGroupOne[][] = new Double[TEST_PER_GROUP][ANGLE_NUMBER_ALL];
+	Double resultAngleGroupOne[][] = new Double[PIC_PER_GROUP][ANGLES];
+
+	// 用于输出到log
+	String stdMsg = "";
 
 	public TestView() {
 		initial();
-		showPage();
+		readInput();
+		// covertToPolar();
+		// showPage();
+		// calculateRa();
+		// convertToCC();
+		// calResult();
+	}
+
+	private void calResult() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void convertToCC() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void calculateRa() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void covertToPolar() {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void readInput() {
+		// TODO Auto-generated method stub
+
+		LogAction la = new LogAction();
+		la.logStd("Info", "Read input text.");
+
+		// 读取点的坐标信息
+
+		String filename = "";
+		group = 0;
+		chosenPicPerGroup = new ArrayList<>();
+		// 读取选中的图片编号
+		for (int j = 0; j < PIC_PER_GROUP; j++) {
+			chosenPicPerGroup.add(chosenPic[group][j]);
+		}
+		FileIOAction fa = new FileIOAction();
+		dotsXInputGroupOne = fa.readInputX(0, chosenPicPerGroup);
+
+		group = 1;
+		chosenPicPerGroup = new ArrayList<>();
+		// 读取选中的图片编号
+		for (int j = 0; j < PIC_PER_GROUP; j++) {
+			chosenPicPerGroup.add(chosenPic[group][j]);
+		}
+		dotsXInputGroupTwo = fa.readInputX(0, chosenPicPerGroup);
+
+		group = 2;
+		chosenPicPerGroup = new ArrayList<>();
+		// 读取选中的图片编号
+		for (int j = 0; j < PIC_PER_GROUP; j++) {
+			chosenPicPerGroup.add(chosenPic[group][j]);
+		}
+		dotsXInputGroupThree = fa.readInputX(0, chosenPicPerGroup);
+
+		group = 0;
+		stdMsg = "";
+		for (int i = 0; i < PICS; i++) {
+			la.logStd("Info", "Xinput for group " + (group + 1) + " pic " + (i + 1));
+			stdMsg = "";
+			for (int j = 0; j < DOTS; j++) {
+				stdMsg += dotsXInputGroupOne[i][j] + ", ";
+			}
+			la.logStd("Info", stdMsg);
+		}
+
+		// 开始读取文件
+
+		// inputX = fa.readInputX(chosenPicPerGroup);
+
+		for (int i = 0; i < GROUPS; i++) {
+			la.logStd("Info", "Group " + (i + 1) + " input X: ");
+			// 读取选中的图片编号
+			for (int j = 0; j < PIC_PER_GROUP; j++) {
+				stdMsg = "Pic " + (j + 1) + ":";
+				for (int k = 0; k < DOTS; k++) {
+					stdMsg += inputX[i][j][k] + ", ";
+				}
+				la.logStd("Info", stdMsg);
+			}
+
+		}
+
+		// Double dotsAngle[] = new Double[PICS * DOTS * 2];
+		// dotsAngle = fa.readDotPosition(filename, PICS * DOTS * 2);
+
+		// 开始添加每个选中的测试的X和 Y坐标
+		// int dotNumber = 0;
+		// for (int j = 0; j < PIC_PER_GROUP; j++) {
+		// for (int i = 0; i < DOTS; i++) {
+		// dotsXInputGroupOne[j][i] = dotsAngle[dotNumber];
+		// dotsYInputGroupOne[j][i] = dotsAngle[dotNumber + 1];
+		// stdMsg = "dotX, pic " + j + " x coor " + i + " added as " +
+		// dotsXInputGroupOne[j][i];
+		// la.logStd("Info", stdMsg);
+		// System.out.println("dotY , pic " + j + " y coor " + i + " added as "
+		// + dotsYInputGroupOne[j][i]);
+		// dotNumber += 2;
+		// }
+		// }
 	}
 
 	public void initial() {
 
-		// 初始化
-		for (int i = 0; i < GROUP_NUMBER; i++) {
-			for (int j = 0; j < TEST_PER_GROUP; j++) {
-				// 创建图片的路径
+		LogAction la = new LogAction();
+		la.logStd("Info", "---Test View---");
+		la.logStd("Info", "Initializing test view.");
+
+		// 初始化图片的路径
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PIC_PER_GROUP; j++) {
 				inputPathImageGroup[i][j] = "C:/hptest/input/images/group" + (i + 1) + "/" + (j + 1) + ".jpg";
-				// 角度
-				rotateAngle[i][j] = 0.00;
 			}
 		}
-		System.out.println(inputPathImageGroup[0][0]);
 
-		// 读取点的坐标信息
-		INPUT_PATH_TEXT[0] = "C:/hptest/input/text/position_point_group1.txt";
-		INPUT_PATH_TEXT[1] = "C:/hptest/input/text/position_point_group2.txt";
-		INPUT_PATH_TEXT[2] = "C:/hptest/input/text/position_point_group3.txt";
-		String filename = INPUT_PATH_TEXT[0];
-		FileIOAction fa = new FileIOAction();
-		Double dotsAngle[] = new Double[PICS * DOTS * 2];
-		dotsAngle = fa.readDotPosition(filename, PICS * DOTS * 2);
+		// 初始化角度
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PIC_PER_GROUP; j++) {
+				for (int k = 0; k < DOTS; k++) {
+					inputX[i][j][k] = 0.00;
+					inputY[i][j][k] = 0.00;
+					inputP[i][j][k] = 0.00;
+					inputRa[i][j][k] = 0.00;
+					outputX[i][j][k] = 0.00;
+					outputY[i][j][k] = 0.00;
+				}
+				radian[i][j] = 0.00;
+			}
+		}
 
-		// 开始添加每个测试的X 和 Y 坐标
-		int dotNumber = 0;
-		for (int j = 0; j < TEST_PER_GROUP; j++) {
-			for (int i = 0; i < DOTS; i++) {
-				dotsXInputGroupOne[j][i] = dotsAngle[dotNumber];
-				dotsYInputGroupOne[j][i] = dotsAngle[dotNumber + 1];
-				System.out.println("dotX, pic " + j + " x coor " + i + " added as " + dotsXInputGroupOne[j][i]);
-				System.out.println("dotY , pic " + j + " y coor " + i + " added as " + dotsYInputGroupOne[j][i]);
-				dotNumber += 2;
+		// 初始化结果坐标
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PIC_PER_GROUP; j++) {
+				for (int k = 0; k < ANGLES; k++) {
+					finalAngle[i][j][k] = 0.00;
+					finalAngleStr[i][j][k] = "";
+				}
 			}
 		}
 
 		// 转化原始坐标为极坐标
 		AngleCalAction aca = new AngleCalAction();
 		// 第一组
-		for (int j = 0; j < TEST_PER_GROUP; j++) {
+		for (int j = 0; j < PIC_PER_GROUP; j++) {
 			for (int i = 0; i < DOTS; i = i + 2) {
-				dotsPRadiusGroupOne[j][i] = aca.getPolarRadiusFromRightAngel(dotsXInputGroupOne[j][i], dotsYInputGroupOne[j][i]);
-				dotsPAngleGroupOne[j][i] = aca.getPolarRadiusFromRightAngel(dotsYInputGroupOne[j][i], dotsXInputGroupOne[j][i]);
-				System.out.println("polar radius, pic " + j + " radius " + i + " added as " + dotsPRadiusGroupOne[j][i]);
-				System.out.println("polar angle, pic " + j + " angel " + i + " added as " + dotsPAngleGroupOne[j][i]);
+				// dotsPRadiusGroupOne[j][i] =
+				// aca.getPolarRadiusFromRightAngel(dotsXInputGroupOne[j][i],
+				// dotsYInputGroupOne[j][i]);
+				// dotsPAngleGroupOne[j][i] =
+				// aca.getPolarRadiusFromRightAngel(dotsYInputGroupOne[j][i],
+				// dotsXInputGroupOne[j][i]);
+				// System.out.println("polar radius, pic " + j + " radius " + i
+				// + " added as " + dotsPRadiusGroupOne[j][i]);
+				// System.out.println("polar angle, pic " + j + " angel " + i +
+				// " added as " + dotsPAngleGroupOne[j][i]);
 			}
 		}
 
+		// 随机选择图片
+		getRandomPic();
+
 		// 初始化随机旋转角度
 
+	}
+
+	private void getRandomPic() {
+		// TODO 随机选择图片，并去除重复编号
+		LogAction la = new LogAction();
+		DirectoryAction da = new DirectoryAction();
+		int fileCount = 0, randomNum = 0;
+
+		for (int i = 0; i < GROUPS; i++) {
+			fileCount = da.getFileAmount(i);
+			la.logStd("Info", "There are " + fileCount + " files in group " + i);
+			chosenPicPerGroup = new ArrayList<Integer>();
+			for (int j = 0; j < PIC_PER_GROUP; j++) {
+				randomNum = (int) (Math.random() * fileCount);
+				while (chosenPicPerGroup.contains(randomNum)) {
+					randomNum = (randomNum + 1) % fileCount;
+				}
+				chosenPicPerGroup.add(randomNum);
+				chosenPic[i][j] = randomNum;
+			}
+		}
+
+		stdMsg = "";
+		for (int i = 0; i < GROUPS; i++) {
+			stdMsg = "Random pic chosen for group " + (i + 1) + ": ";
+			for (int j = 0; j < PIC_PER_GROUP; j++) {
+				stdMsg = stdMsg + (chosenPic[i][j] + 1) + ", ";
+			}
+			la.logStd("Info", stdMsg);
+		}
 	}
 
 	public void showPage() {
@@ -418,17 +605,17 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	private void calVeriticalAngle() {
 		// TODO 计算点两两相连后和中心线的夹角
-		for (int i = 0; i < ANGLE_NUMBER_ALL; i++) {
+		for (int i = 0; i < ANGLES; i++) {
 			// Do something
 		}
-		// dotsPRadiusGroupOne  resultAngleGroupOne
+		// dotsPRadiusGroupOne resultAngleGroupOne
 
 	}
 
 	private void sumupRotateAngle() {
 		// TODO 在结束测试之后汇总旋转的角度
-		for (int i = 0; i < GROUP_NUMBER; i++) {
-			for (int j = 0; j < TEST_PER_GROUP; j++) {
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PIC_PER_GROUP; j++) {
 				while (rotateAngle[i][j] < 0.00) {
 					rotateAngle[i][j] += (2 * Math.PI);
 				}
@@ -438,7 +625,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 		// 将rotateAngle 一组一组的转入 Polar Angle
 		AngleCalAction aca = new AngleCalAction();
-		for (int i = 0; i < TEST_PER_GROUP; i++) {
+		for (int i = 0; i < PIC_PER_GROUP; i++) {
 			for (int j = 0; j < DOTS * PICS; j++) {
 				// 转换角度为弧度
 				dotsPAngleGroupOne[i][j] = aca.angleToRadians(rotateAngle[0][i]);
@@ -453,11 +640,11 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		pic += roll;
 		if (pic < 0) {
 			group--;
-			pic += TEST_PER_GROUP;
+			pic += PIC_PER_GROUP;
 		}
-		if (pic > TEST_PER_GROUP) {
+		if (pic > PIC_PER_GROUP) {
 			group++;
-			pic -= TEST_PER_GROUP;
+			pic -= PIC_PER_GROUP;
 		}
 
 	}

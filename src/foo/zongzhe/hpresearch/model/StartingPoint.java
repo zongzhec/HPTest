@@ -10,7 +10,9 @@ public class StartingPoint {
 
 	final static int ERROR_CODE_INPUT_FILE_NOT_EXIST = 101;
 	final static int NUMBER_OF_GROUP = 1;
+	static final int PIC_PER_GROUP = 5;
 
+	static String ErrorMsg;
 	public static String INPUT_PATH_TEXT[] = new String[3];
 
 	public static void main(String[] args) {
@@ -19,7 +21,6 @@ public class StartingPoint {
 		 * ----------------------- Initialization Phase -----------------------
 		 */
 		// Variables in the initialization phase
-		
 
 		// Check required directory and start to log
 		DirectoryAction da = new DirectoryAction();
@@ -29,6 +30,7 @@ public class StartingPoint {
 		}
 
 		LogAction la = new LogAction();
+		la.logStd("Info", "------------------------New Run--------------------------------");
 		la.logStd("Info", "Link Start!");
 		INPUT_PATH_TEXT[0] = "C:/hptest/input/text/position_point_group1.txt";
 		INPUT_PATH_TEXT[1] = "C:/hptest/input/text/position_point_group2.txt";
@@ -37,45 +39,59 @@ public class StartingPoint {
 		// 显示准备界面
 		PreWelcomeView preWelView = new PreWelcomeView();
 		preWelView.showPage();
+		
+		try
+
+		{
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		// 处理信息，当出现异常后退出
 		boolean itWorks = true;
-		int errorCode = -1;
 
 		while (itWorks) {
 
 			// 检查输入的文本是否存在，若不存在，则报错后退出
-//			DirectoryAction da = new DirectoryAction();
 			for (int i = 0; i < NUMBER_OF_GROUP; i++) {
 				File inputText = new File(INPUT_PATH_TEXT[i]);
 				if (!da.whetherDirectoryExists(inputText)) {
-					errorCode = ERROR_CODE_INPUT_FILE_NOT_EXIST;
+					ErrorMsg = "Input file does not exist, exit";
+					itWorks = false;
+					break;
+				}
+			}
+
+			// 检查每组的图片数目是否大于等于5张，若小于5张，则报错后退出
+			int fileCount = 0;
+			for (int i = 0; i < NUMBER_OF_GROUP; i++) {
+				fileCount = da.getFileAmount(i);
+				la.logStd("Info", "There are " + fileCount + " files in group " + (i+1));
+				if (fileCount < PIC_PER_GROUP) {
+					ErrorMsg = "Group " + (i+1) + " does not have sufficient pics, exit";
 					itWorks = false;
 					break;
 				}
 			}
 
 			// 所有检查都符合要求
-			itWorks = true;
-			break;
+			
+			
 		}
 
 		if (!itWorks) {
-			switch (errorCode) {
-			case ERROR_CODE_INPUT_FILE_NOT_EXIST:
-				la.logStd("ERROR", "指定的输入文件并不存在，请检查文件并重启此程序!");
-				preWelView.setVisible(false);
-				System.exit(0);
-				break;
-
-			default:
-				break;
-			}
+			la.logStd("ERROR", ErrorMsg);
+			preWelView.setVisible(false);
+			System.exit(0);
 		}
 
 		// 准备完毕，关闭准备界面，并显示欢迎界面
-		try {
-			Thread.sleep(5000);
+		try
+
+		{
+			Thread.sleep(0);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

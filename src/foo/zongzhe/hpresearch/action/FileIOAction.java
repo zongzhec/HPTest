@@ -9,10 +9,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.List;
 
 import foo.zongzhe.hpresearch.model.StartingPoint;
 
 public class FileIOAction {
+
+	static final int GROUPS = 3;
+	static final int PIC_PER_GROUP = 5;
+	static final int DOTS = 5;
+	static String INPUT_PATH_TEXT[] = new String[3];
 
 	public static void main(String[] args) {
 		// TODO 进行文件的读写操作
@@ -124,6 +130,66 @@ public class FileIOAction {
 		}
 
 		return dots;
+	}
+
+	public Double[][] readInputX(Integer group, List<Integer> chosenPicPerGroup) {
+		// TODO 读取X坐标
+		INPUT_PATH_TEXT[0] = "C:/hptest/input/text/position_point_group1.txt";
+		INPUT_PATH_TEXT[1] = "C:/hptest/input/text/position_point_group2.txt";
+		INPUT_PATH_TEXT[2] = "C:/hptest/input/text/position_point_group3.txt";
+		Double inputX[][] = new Double[PIC_PER_GROUP][DOTS];
+		LogAction la = new LogAction();
+
+		la.logStd("Info", "Read input to get X coord");
+		int pic = 0, dot = 0;
+		try {
+			String filename = INPUT_PATH_TEXT[group];
+			FileReader reader = new FileReader(filename);
+			BufferedReader br = new BufferedReader(reader);
+			String str = null;
+			boolean isLineNumber = true;
+			int lineNum = 0;
+			pic = 0;
+			dot = 0;
+			while ((str = br.readLine()) != null) {
+				// 是行号
+				if (isLineNumber) {
+					lineNum = Integer.parseInt(str);
+					if (chosenPicPerGroup.contains(lineNum-1)) {
+						// 是选中的组，准备进一步读取
+						dot = 0;
+//						la.logStd("Info", "line " + lineNum + " is contained as chosen.");
+						str = br.readLine();
+//						la.logStd("Info", "Following contant: " + str);
+						String[] dotsStr = str.split(" ");
+						for (int j = 0; j < dotsStr.length; j = j + 2) {
+							inputX[pic][dot] = Double.valueOf(dotsStr[j]);
+//							la.logStd("Info", dotsStr[j] + " added into input X, group " + (group + 1) + ", pic " + (pic + 1) + ", dot " + dot);
+							dot++;
+						}
+						pic++;
+					} else {
+						isLineNumber = false;
+					}
+
+				} else {
+					isLineNumber = true;
+				}
+			}
+			br.close();
+			reader.close();
+
+		}
+
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return inputX;
 	}
 
 }
