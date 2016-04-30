@@ -14,6 +14,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -83,7 +84,9 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	// 每组随机抽到的图片编号，对应每一组
 	static int chosenPic[][] = new int[GROUPS][PIC_PER_GROUP];
-	static List<Integer> chosenPicPerGroup = new ArrayList<Integer>();
+	static List<Integer> chosenPicPerGroupOne = new ArrayList<Integer>();
+	static List<Integer> chosenPicPerGroupTwo = new ArrayList<Integer>();
+	static List<Integer> chosenPicPerGroupThree = new ArrayList<Integer>();
 
 	// 输入的X，Y点坐标，对应每一组，每张图，每个点
 	static Double inputX[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
@@ -107,6 +110,8 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	Double dotsXInputGroupTwo[][] = new Double[PIC_PER_GROUP][DOTS];
 	Double dotsXInputGroupThree[][] = new Double[PIC_PER_GROUP][DOTS];
 	Double dotsYInputGroupOne[][] = new Double[PIC_PER_GROUP][DOTS];
+	Double dotsYInputGroupTwo[][] = new Double[PIC_PER_GROUP][DOTS];
+	Double dotsYInputGroupThree[][] = new Double[PIC_PER_GROUP][DOTS];
 	// 测试里面的坐标使用极坐标存储
 	Double dotsPRadiusGroupOne[][] = new Double[PIC_PER_GROUP][DOTS * PICS];
 	Double dotsPAngleGroupOne[][] = new Double[PIC_PER_GROUP][DOTS * PICS];
@@ -162,60 +167,57 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		la.logStd("Info", "Read input text.");
 
 		// 读取点的坐标信息
-
-		String filename = "";
 		group = 0;
-		chosenPicPerGroup = new ArrayList<>();
 		// 读取选中的图片编号
-		for (int j = 0; j < PIC_PER_GROUP; j++) {
-			chosenPicPerGroup.add(chosenPic[group][j]);
-		}
 		FileIOAction fa = new FileIOAction();
-		dotsXInputGroupOne = fa.readInputX(0, chosenPicPerGroup);
-
-		group = 1;
-		chosenPicPerGroup = new ArrayList<>();
-		// 读取选中的图片编号
-		for (int j = 0; j < PIC_PER_GROUP; j++) {
-			chosenPicPerGroup.add(chosenPic[group][j]);
-		}
-		dotsXInputGroupTwo = fa.readInputX(0, chosenPicPerGroup);
-
-		group = 2;
-		chosenPicPerGroup = new ArrayList<>();
-		// 读取选中的图片编号
-		for (int j = 0; j < PIC_PER_GROUP; j++) {
-			chosenPicPerGroup.add(chosenPic[group][j]);
-		}
-		dotsXInputGroupThree = fa.readInputX(0, chosenPicPerGroup);
-
-		group = 0;
+		dotsXInputGroupOne = fa.readInputX(0, chosenPicPerGroupOne);
+		dotsYInputGroupOne = fa.readInputY(0, chosenPicPerGroupOne);
 		stdMsg = "";
 		for (int i = 0; i < PICS; i++) {
-			la.logStd("Info", "Xinput for group " + (group + 1) + " pic " + (i + 1));
+			la.logStd("Info", "Input for group " + (group + 1) + " pic " + (i + 1));
 			stdMsg = "";
 			for (int j = 0; j < DOTS; j++) {
 				stdMsg += dotsXInputGroupOne[i][j] + ", ";
+				stdMsg += dotsYInputGroupOne[i][j] + ". ";
 			}
 			la.logStd("Info", stdMsg);
 		}
 
-		// 开始读取文件
-
-		// inputX = fa.readInputX(chosenPicPerGroup);
-
-		for (int i = 0; i < GROUPS; i++) {
-			la.logStd("Info", "Group " + (i + 1) + " input X: ");
-			// 读取选中的图片编号
-			for (int j = 0; j < PIC_PER_GROUP; j++) {
-				stdMsg = "Pic " + (j + 1) + ":";
-				for (int k = 0; k < DOTS; k++) {
-					stdMsg += inputX[i][j][k] + ", ";
-				}
-				la.logStd("Info", stdMsg);
+		group = 1;
+		// 读取选中的图片编号
+		dotsXInputGroupTwo = fa.readInputX(1, chosenPicPerGroupTwo);
+		dotsYInputGroupTwo = fa.readInputY(1, chosenPicPerGroupTwo);
+		stdMsg = "";
+		for (int i = 0; i < PICS; i++) {
+			la.logStd("Info", "Input for group " + (group + 1) + " pic " + (i + 1));
+			stdMsg = "";
+			for (int j = 0; j < DOTS; j++) {
+				stdMsg += dotsXInputGroupTwo[i][j] + ", ";
+				stdMsg += dotsYInputGroupTwo[i][j] + ". ";
 			}
-
+			la.logStd("Info", stdMsg);
 		}
+
+		group = 2;
+		// 读取选中的图片编号
+		dotsXInputGroupThree = fa.readInputX(2, chosenPicPerGroupThree);
+		dotsYInputGroupThree = fa.readInputY(2, chosenPicPerGroupThree);
+		stdMsg = "";
+		for (int i = 0; i < PICS; i++) {
+			la.logStd("Info", "Input for group " + (group + 1) + " pic " + (i + 1));
+			stdMsg = "";
+			for (int j = 0; j < DOTS; j++) {
+				stdMsg += dotsXInputGroupThree[i][j] + ", ";
+				stdMsg += dotsYInputGroupThree[i][j] + ". ";
+			}
+			la.logStd("Info", stdMsg);
+		}
+
+		group = 0;
+
+		group = 1;
+
+		group = 2;
 
 		// Double dotsAngle[] = new Double[PICS * DOTS * 2];
 		// dotsAngle = fa.readDotPosition(filename, PICS * DOTS * 2);
@@ -305,28 +307,66 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		DirectoryAction da = new DirectoryAction();
 		int fileCount = 0, randomNum = 0;
 
-		for (int i = 0; i < GROUPS; i++) {
-			fileCount = da.getFileAmount(i);
-			la.logStd("Info", "There are " + fileCount + " files in group " + i);
-			chosenPicPerGroup = new ArrayList<Integer>();
-			for (int j = 0; j < PIC_PER_GROUP; j++) {
-				randomNum = (int) (Math.random() * fileCount);
-				while (chosenPicPerGroup.contains(randomNum)) {
-					randomNum = (randomNum + 1) % fileCount;
-				}
-				chosenPicPerGroup.add(randomNum);
-				chosenPic[i][j] = randomNum;
+		group = 0;
+		fileCount = da.getFileAmount(group);
+		la.logStd("Info", "There are " + fileCount + " files in group " + (group + 1));
+		chosenPicPerGroupOne = new ArrayList<Integer>();
+		for (int j = 0; j < PIC_PER_GROUP; j++) {
+			randomNum = (int) (Math.random() * fileCount);
+			while (chosenPicPerGroupOne.contains(randomNum)) {
+				randomNum = (randomNum + 1) % fileCount;
 			}
+			chosenPicPerGroupOne.add(randomNum);
+			chosenPic[group][j] = randomNum;
 		}
-
+		Collections.sort(chosenPicPerGroupOne);
 		stdMsg = "";
-		for (int i = 0; i < GROUPS; i++) {
-			stdMsg = "Random pic chosen for group " + (i + 1) + ": ";
-			for (int j = 0; j < PIC_PER_GROUP; j++) {
-				stdMsg = stdMsg + (chosenPic[i][j] + 1) + ", ";
-			}
-			la.logStd("Info", stdMsg);
+		stdMsg = "Random pic chosen for group " + (group + 1) + ": ";
+		for (int i : chosenPicPerGroupOne) {
+			stdMsg = stdMsg + (i + 1) + ", ";
 		}
+		la.logStd("Info", stdMsg);
+
+		group = 1;
+		fileCount = da.getFileAmount(group);
+		la.logStd("Info", "There are " + fileCount + " files in group " + (group + 1));
+		chosenPicPerGroupTwo = new ArrayList<Integer>();
+		for (int j = 0; j < PIC_PER_GROUP; j++) {
+			randomNum = (int) (Math.random() * fileCount);
+			while (chosenPicPerGroupTwo.contains(randomNum)) {
+				randomNum = (randomNum + 1) % fileCount;
+			}
+			chosenPicPerGroupTwo.add(randomNum);
+			chosenPic[group][j] = randomNum;
+		}
+		Collections.sort(chosenPicPerGroupTwo);
+		stdMsg = "";
+		stdMsg = "Random pic chosen for group " + (group + 1) + ": ";
+		for (int i : chosenPicPerGroupTwo) {
+			stdMsg = stdMsg + (i + 1) + ", ";
+		}
+		la.logStd("Info", stdMsg);
+
+		group = 2;
+		fileCount = da.getFileAmount(group);
+		la.logStd("Info", "There are " + fileCount + " files in group " + (group + 1));
+		chosenPicPerGroupThree = new ArrayList<Integer>();
+		for (int j = 0; j < PIC_PER_GROUP; j++) {
+			randomNum = (int) (Math.random() * fileCount);
+			while (chosenPicPerGroupThree.contains(randomNum)) {
+				randomNum = (randomNum + 1) % fileCount;
+			}
+			chosenPicPerGroupThree.add(randomNum);
+			chosenPic[group][j] = randomNum;
+		}
+		Collections.sort(chosenPicPerGroupThree);
+		stdMsg = "";
+		stdMsg = "Random pic chosen for group " + (group + 1) + ": ";
+		for (int i : chosenPicPerGroupThree) {
+			stdMsg = stdMsg + (i + 1) + ", ";
+		}
+		la.logStd("Info", stdMsg);
+
 	}
 
 	public void showPage() {

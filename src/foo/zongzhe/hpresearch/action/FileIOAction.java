@@ -138,9 +138,7 @@ public class FileIOAction {
 		INPUT_PATH_TEXT[1] = "C:/hptest/input/text/position_point_group2.txt";
 		INPUT_PATH_TEXT[2] = "C:/hptest/input/text/position_point_group3.txt";
 		Double inputX[][] = new Double[PIC_PER_GROUP][DOTS];
-		LogAction la = new LogAction();
 
-		la.logStd("Info", "Read input to get X coord");
 		int pic = 0, dot = 0;
 		try {
 			String filename = INPUT_PATH_TEXT[group];
@@ -155,16 +153,13 @@ public class FileIOAction {
 				// 是行号
 				if (isLineNumber) {
 					lineNum = Integer.parseInt(str);
-					if (chosenPicPerGroup.contains(lineNum-1)) {
+					if (chosenPicPerGroup.contains(lineNum - 1)) {
 						// 是选中的组，准备进一步读取
 						dot = 0;
-//						la.logStd("Info", "line " + lineNum + " is contained as chosen.");
 						str = br.readLine();
-//						la.logStd("Info", "Following contant: " + str);
 						String[] dotsStr = str.split(" ");
 						for (int j = 0; j < dotsStr.length; j = j + 2) {
 							inputX[pic][dot] = Double.valueOf(dotsStr[j]);
-//							la.logStd("Info", dotsStr[j] + " added into input X, group " + (group + 1) + ", pic " + (pic + 1) + ", dot " + dot);
 							dot++;
 						}
 						pic++;
@@ -178,18 +173,61 @@ public class FileIOAction {
 			}
 			br.close();
 			reader.close();
-
-		}
-
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-
 		return inputX;
+	}
+	
+	public Double[][] readInputY(Integer group, List<Integer> chosenPicPerGroup) {
+		// TODO 读取X坐标
+		INPUT_PATH_TEXT[0] = "C:/hptest/input/text/position_point_group1.txt";
+		INPUT_PATH_TEXT[1] = "C:/hptest/input/text/position_point_group2.txt";
+		INPUT_PATH_TEXT[2] = "C:/hptest/input/text/position_point_group3.txt";
+		Double inputY[][] = new Double[PIC_PER_GROUP][DOTS];
+
+		int pic = 0, dot = 0;
+		try {
+			String filename = INPUT_PATH_TEXT[group];
+			FileReader reader = new FileReader(filename);
+			BufferedReader br = new BufferedReader(reader);
+			String str = null;
+			boolean isLineNumber = true;
+			int lineNum = 0;
+			pic = 0;
+			dot = 0;
+			while ((str = br.readLine()) != null) {
+				// 是行号
+				if (isLineNumber) {
+					lineNum = Integer.parseInt(str);
+					if (chosenPicPerGroup.contains(lineNum - 1)) {
+						// 是选中的组，准备进一步读取
+						dot = 0;
+						str = br.readLine();
+						String[] dotsStr = str.split(" ");
+						for (int j = 1; j < dotsStr.length; j = j + 2) {
+							inputY[pic][dot] = Double.valueOf(dotsStr[j]);
+							dot++;
+						}
+						pic++;
+					} else {
+						isLineNumber = false;
+					}
+
+				} else {
+					isLineNumber = true;
+				}
+			}
+			br.close();
+			reader.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return inputY;
 	}
 
 }
