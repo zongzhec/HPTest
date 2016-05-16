@@ -13,6 +13,15 @@ public class DirectoryAction {
 		}
 		return true;
 	}
+	
+	public boolean whetherFileExists(File file) {
+
+		if (!file.exists() && !file.isDirectory()) {
+			System.out.println("不存在");
+			return false;
+		}
+		return true;
+	}
 
 	public void createDir(File dir) {
 		System.out.println("开始生成路径");

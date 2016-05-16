@@ -12,8 +12,7 @@ public class AngleCalAction {
 		double p = 0.0;
 		double angle = 0.0;
 
-		System.out.println(aca.getPolarRadiusFromRightAngel(x, y));
-		System.out.println("getPolarAngleFromRightAngel: " + aca.getPolarAngleFromRightAngel(x, y));
+		angle = aca.getRandomAngle();
 	}
 
 	// 从直角坐标转换为极坐标 并获得极径
@@ -45,6 +44,15 @@ public class AngleCalAction {
 		;
 
 		return radian;
+	}
+
+	// 返回一个直角坐标的随机角度
+	public int getRandomAngle() {
+		int angle = 0;
+
+		angle = (int) (Math.random() * 360) - 180;
+
+		return angle;
 	}
 
 }

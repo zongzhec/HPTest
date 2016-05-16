@@ -13,11 +13,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -31,6 +31,8 @@ import foo.zongzhe.hpresearch.action.AngleCalAction;
 import foo.zongzhe.hpresearch.action.DirectoryAction;
 import foo.zongzhe.hpresearch.action.FileIOAction;
 import foo.zongzhe.hpresearch.action.LogAction;
+import jxl.write.WriteException;
+import jxl.write.biff.RowsExceededException;
 
 public class TestView extends JFrame implements ActionListener, KeyListener {
 
@@ -91,7 +93,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	// 输入的X，Y点坐标，对应每一组，每张图，每个点
 	static Double inputX[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
 	static Double inputY[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
-	// 每张图的旋转角度
+	// 每张图的旋转角度，对应每一组，每张图
 	static Double radian[][] = new Double[GROUPS][PIC_PER_GROUP];
 	// 输入的X，Y点坐标转换后对应的极坐标，对应每一组，每张图，每个点
 	static Double inputP[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
@@ -126,6 +128,16 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	// 存放结果的角度
 	Double resultAngleGroupOne[][] = new Double[PIC_PER_GROUP][ANGLES];
+
+	// 存放结果的文件，以及列与行的坐标
+	static String outputFileName = "";
+	static File outputFile;
+	static int rowStart;
+	static int testStart; // 记录这是当天的第几次测试
+	static int column;
+	static int row;
+	static String outputMsg;
+	boolean create = true;
 
 	// 用于输出到log
 	String stdMsg = "";
@@ -175,10 +187,13 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		stdMsg = "";
 		for (int i = 0; i < PICS; i++) {
 			la.logStd("Info", "Input for group " + (group + 1) + " pic " + (i + 1));
+			chosenPic[0][i] = chosenPicPerGroupOne.get(i);
 			stdMsg = "";
 			for (int j = 0; j < DOTS; j++) {
 				stdMsg += dotsXInputGroupOne[i][j] + ", ";
 				stdMsg += dotsYInputGroupOne[i][j] + ". ";
+				inputX[0][i][j] = dotsXInputGroupOne[i][j];
+				inputY[0][i][j] = dotsYInputGroupOne[i][j];
 			}
 			la.logStd("Info", stdMsg);
 		}
@@ -190,10 +205,13 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		stdMsg = "";
 		for (int i = 0; i < PICS; i++) {
 			la.logStd("Info", "Input for group " + (group + 1) + " pic " + (i + 1));
+			chosenPic[1][i] = chosenPicPerGroupTwo.get(i);
 			stdMsg = "";
 			for (int j = 0; j < DOTS; j++) {
 				stdMsg += dotsXInputGroupTwo[i][j] + ", ";
 				stdMsg += dotsYInputGroupTwo[i][j] + ". ";
+				inputX[1][i][j] = dotsXInputGroupTwo[i][j];
+				inputY[1][i][j] = dotsYInputGroupTwo[i][j];
 			}
 			la.logStd("Info", stdMsg);
 		}
@@ -205,37 +223,47 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		stdMsg = "";
 		for (int i = 0; i < PICS; i++) {
 			la.logStd("Info", "Input for group " + (group + 1) + " pic " + (i + 1));
+			chosenPic[2][i] = chosenPicPerGroupThree.get(i);
 			stdMsg = "";
 			for (int j = 0; j < DOTS; j++) {
 				stdMsg += dotsXInputGroupThree[i][j] + ", ";
 				stdMsg += dotsYInputGroupThree[i][j] + ". ";
+				inputX[2][i][j] = dotsXInputGroupThree[i][j];
+				inputY[2][i][j] = dotsYInputGroupThree[i][j];
 			}
 			la.logStd("Info", stdMsg);
 		}
 
-		group = 0;
+		outputExcelDots();
 
-		group = 1;
+	}
 
-		group = 2;
+	private void outputExcelDots() {
+		FileIOAction fa = new FileIOAction();
+		column = 5;
+		row = rowStart;
+		outputMsg = "";
+		create = false;
+		// TODO 输出随机选择后每张图片的点，到Excel
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PICS; j++) {				
+				for (int k = 0; k < DOTS; k++) {
+					// 输出每张图的点
+					outputMsg = String.valueOf(inputX[i][j][k]) + ", " + String.valueOf(inputY[i][j][k]);
+					try {
+						fa.writeExcel(outputFileName, column + k, row, outputMsg, create);
+					} catch (RowsExceededException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (WriteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				row++;
+			}
+		}
 
-		// Double dotsAngle[] = new Double[PICS * DOTS * 2];
-		// dotsAngle = fa.readDotPosition(filename, PICS * DOTS * 2);
-
-		// 开始添加每个选中的测试的X和 Y坐标
-		// int dotNumber = 0;
-		// for (int j = 0; j < PIC_PER_GROUP; j++) {
-		// for (int i = 0; i < DOTS; i++) {
-		// dotsXInputGroupOne[j][i] = dotsAngle[dotNumber];
-		// dotsYInputGroupOne[j][i] = dotsAngle[dotNumber + 1];
-		// stdMsg = "dotX, pic " + j + " x coor " + i + " added as " +
-		// dotsXInputGroupOne[j][i];
-		// la.logStd("Info", stdMsg);
-		// System.out.println("dotY , pic " + j + " y coor " + i + " added as "
-		// + dotsYInputGroupOne[j][i]);
-		// dotNumber += 2;
-		// }
-		// }
 	}
 
 	public void initial() {
@@ -243,6 +271,11 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		LogAction la = new LogAction();
 		la.logStd("Info", "---Test View---");
 		la.logStd("Info", "Initializing test view.");
+		SimpleDateFormat dfFileName = new SimpleDateFormat("yyyyMMdd");
+		String sysTimeFileName = dfFileName.format(new Date()).toString();
+		outputFileName = "HPTest_" + sysTimeFileName + ".xls";
+		outputFile = new File("C:/hptest/output/result_output/" + outputFileName);
+		rowStart = 0;
 
 		// 初始化图片的路径
 		for (int i = 0; i < GROUPS; i++) {
@@ -276,28 +309,209 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 			}
 		}
 
-		// 转化原始坐标为极坐标
-		AngleCalAction aca = new AngleCalAction();
-		// 第一组
-		for (int j = 0; j < PIC_PER_GROUP; j++) {
-			for (int i = 0; i < DOTS; i = i + 2) {
-				// dotsPRadiusGroupOne[j][i] =
-				// aca.getPolarRadiusFromRightAngel(dotsXInputGroupOne[j][i],
-				// dotsYInputGroupOne[j][i]);
-				// dotsPAngleGroupOne[j][i] =
-				// aca.getPolarRadiusFromRightAngel(dotsYInputGroupOne[j][i],
-				// dotsXInputGroupOne[j][i]);
-				// System.out.println("polar radius, pic " + j + " radius " + i
-				// + " added as " + dotsPRadiusGroupOne[j][i]);
-				// System.out.println("polar angle, pic " + j + " angel " + i +
-				// " added as " + dotsPAngleGroupOne[j][i]);
-			}
-		}
+		// 输出Excel的框架信息
+		outputExcelFrame();
 
 		// 随机选择图片
 		getRandomPic();
+		// 输出选中的图片，以及它们的点和初始坐标
+		outputExcelRandomPic();
 
 		// 初始化随机旋转角度
+		getRandomAngle();
+		// 输出生成的角度
+		outputExcelRandomAngle();
+
+	}
+
+	private void outputExcelRandomAngle() {
+		// TODO 输出生成的角度
+		LogAction la = new LogAction();
+		la.logStd("Info", "Start to output random agle to Excel file.");
+		FileIOAction fa = new FileIOAction();
+		column = 3;
+		row = rowStart;
+		outputMsg = "";
+		create = false;
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PIC_PER_GROUP; j++) {
+				outputMsg = String.valueOf(radian[i][j]);
+				try {
+					fa.writeExcel(outputFileName, column, row, outputMsg, create);
+					row++;
+				} catch (RowsExceededException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (WriteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		la.logStd("Info", "Random Angle output to Excel file.");
+
+	}
+
+	private void outputExcelRandomPic() {
+		// TODO 输出选中的图片，以及它们的点和初始坐标
+		LogAction la = new LogAction();
+		FileIOAction fa = new FileIOAction();
+		column = 1;
+		row = rowStart;
+		outputMsg = "";
+		create = false;
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PICS; j++) {
+				// 输出每个组中随机选出的图片序号
+				try {
+					outputMsg = String.valueOf(i + 1);
+					fa.writeExcel(outputFileName, column, row, outputMsg, create);
+					column++;
+					outputMsg = String.valueOf(chosenPic[i][j] + 1);
+					fa.writeExcel(outputFileName, column, row, outputMsg, create);
+					column--;
+					row++;
+				} catch (RowsExceededException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (WriteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+		}
+	}
+
+	private void outputExcelFrame() {
+		// TODO 输出Excel的框架信息
+		// 检查输出文档是否存在，若不存在就新建一个
+		LogAction la = new LogAction();
+		DirectoryAction da = new DirectoryAction();
+		if (!da.whetherFileExists(outputFile)) {
+			// 文件不存在，新建之，并写入标题
+			la.logStd("Info", "Output file does not exist, create it.");
+			FileIOAction fa = new FileIOAction();
+			column = 0;
+			row = 0;
+			outputMsg = "";
+			create = true;
+			try {
+				outputMsg = "测试序号";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				create = false;
+				column++;
+				outputMsg = "组别";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "图片序号";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "初始随机角度";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "旋转后角度";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点1";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点2";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点3";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点4";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点5";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点1点2夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点1点3夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点1点4夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点1点5夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点2点3夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点2点4夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点2点5夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点3点4夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点3点5夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				column++;
+				outputMsg = "点4点5夹角";
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				rowStart = 1;
+				testStart = 1;
+			} catch (RowsExceededException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (WriteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			// 若存在，则获得写入位置，直接追加
+			FileIOAction fa = new FileIOAction();
+			try {
+				System.out.println("start to get row count at " + outputFileName);
+				rowStart = fa.getRowStart(outputFileName);
+				// rowStart = 31;
+				System.out.println("rowStart: " + rowStart);
+				// testStart = fa.getTestStart(outputFileName);
+				testStart = (rowStart - 1) / 15 + 1;
+			} catch (WriteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} finally {
+
+			}
+			la.logStd("Info", "Output file exists, will tarts at row " + rowStart);
+		}
+		FileIOAction fa = new FileIOAction();
+		row = rowStart;
+		column = 0;
+		outputMsg = String.valueOf(testStart);
+		for (int i = 0; i < GROUPS * PICS; i++) {
+			// 每次测试一共3组*5图
+			try {
+				create = false;
+				fa.writeExcel(outputFileName, column, row, outputMsg, create);
+			} catch (RowsExceededException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (WriteException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			row++;
+		}
+	}
+
+	private void getRandomAngle() {
+		// TODO 对每张选择的图片赋予一个随机角度
+		AngleCalAction aca = new AngleCalAction();
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PIC_PER_GROUP; j++) {
+				radian[i][j] = Double.valueOf(aca.getRandomAngle());
+			}
+		}
 
 	}
 
@@ -317,9 +531,12 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 				randomNum = (randomNum + 1) % fileCount;
 			}
 			chosenPicPerGroupOne.add(randomNum);
-			chosenPic[group][j] = randomNum;
 		}
 		Collections.sort(chosenPicPerGroupOne);
+		for (int i = 0; i < PIC_PER_GROUP; i++) {
+			chosenPic[group][i] = chosenPicPerGroupOne.get(i);
+		}
+		
 		stdMsg = "";
 		stdMsg = "Random pic chosen for group " + (group + 1) + ": ";
 		for (int i : chosenPicPerGroupOne) {
@@ -337,9 +554,11 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 				randomNum = (randomNum + 1) % fileCount;
 			}
 			chosenPicPerGroupTwo.add(randomNum);
-			chosenPic[group][j] = randomNum;
 		}
 		Collections.sort(chosenPicPerGroupTwo);
+		for (int i = 0; i < PIC_PER_GROUP; i++) {
+			chosenPic[group][i] = chosenPicPerGroupTwo.get(i);
+		}
 		stdMsg = "";
 		stdMsg = "Random pic chosen for group " + (group + 1) + ": ";
 		for (int i : chosenPicPerGroupTwo) {
@@ -357,9 +576,11 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 				randomNum = (randomNum + 1) % fileCount;
 			}
 			chosenPicPerGroupThree.add(randomNum);
-			chosenPic[group][j] = randomNum;
 		}
 		Collections.sort(chosenPicPerGroupThree);
+		for (int i = 0; i < PIC_PER_GROUP; i++) {
+			chosenPic[group][i] = chosenPicPerGroupThree.get(i);
+		}
 		stdMsg = "";
 		stdMsg = "Random pic chosen for group " + (group + 1) + ": ";
 		for (int i : chosenPicPerGroupThree) {

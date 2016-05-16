@@ -72,11 +72,11 @@ public class StartingPoint {
 				if (fileCount < PIC_PER_GROUP) {
 					ErrorMsg = "Group " + (i+1) + " does not have sufficient pics, exit";
 					itWorks = false;
-					break;
+					
 				}
 			}
 
-			// 所有检查都符合要求
+			
 			
 			
 		}
