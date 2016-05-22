@@ -29,20 +29,42 @@ public class AngleCalAction {
 	public double getPolarAngleFromRightAngel(double x, double y) {
 
 		double angle = 0.0;
-
 		// 用atan2 的时候无需额外考虑x=0 的情况
 		angle = Math.atan2(y, x);
-
 		return angle;
 	}
 
-	// 将角度转化为弧度
-	public double angleToRadians(double angle) {
+	// 从极坐标转换为直角坐标 并获得X值
+	public double getXFromPolar(double p, double ra) {
+
+		double x = 0.0;
+		// 用atan2 的时候无需额外考虑x=0 的情况
+		x = Math.cos(ra) * p;
+		return x;
+	}
+
+	// 从极坐标转换为直角坐标 并获得Y值
+	public double getYFromPolar(double p, double ra) {
+
+		double y = 0.0;
+		// 用atan2 的时候无需额外考虑x=0 的情况
+		y = Math.sin(ra) * p;
+		return y;
+	}
+
+	// 将直角坐标角度转化为弧度
+	public double angleToRadian(double angle) {
+
 		double radian = 0.0;
-
 		radian = angle * Math.PI / 180;
-		;
+		return radian;
+	}
 
+	// 将弧度转化为直角坐标角度
+	public double radianToCCAngle(double angle) {
+
+		double radian = 0.0;
+		radian = angle * 180 / Math.PI;
 		return radian;
 	}
 
@@ -51,6 +73,24 @@ public class AngleCalAction {
 		int angle = 0;
 
 		angle = (int) (Math.random() * 360) - 180;
+
+		return angle;
+	}
+
+	// 计算直角坐标中，两点连线与中垂线的夹角
+	public double calAngleWithVertiLine(double ccX1, double ccY1, double ccX2, double ccY2) {
+
+		double angle = 0.0;
+		// 因为是中垂线，所以在使用atan2的时候用x/y
+		angle = Math.atan2(ccX1 - ccX2, ccY1 - ccY2);
+		// 将结果转换为角度
+		AngleCalAction aca = new AngleCalAction();
+		angle = aca.radianToCCAngle(angle);
+
+		// 处理一些角度>180°的情况
+		while (Math.abs(angle) > 180) {
+			angle = Math.abs(angle - 180);
+		}
 
 		return angle;
 	}

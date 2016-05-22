@@ -65,13 +65,15 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	int testerCount;
 	int testCount = 0;
 	// 每组里面抽选多少张图
-	static final int PIC_PER_GROUP = 5;
+	static final int PICS = 5;
 	static final int PIC_PER_GROUP_UAT = 5;
+	// 图片库里的图片数量
+	static int picNumInFile = 0;
 	// 有多少个组
 	static final int GROUPS = 3;
 	static final int GROUPS_UAT = 1;
 	// 所有组合计共有多少图
-	static final int FULL_TEST_AMOUNT = PIC_PER_GROUP * GROUPS;
+	static final int FULL_TEST_AMOUNT = PICS * GROUPS;
 	static final int FULL_TEST_AMOUNT_UAT = PIC_PER_GROUP_UAT * GROUPS_UAT;
 	// 图片的宽和高
 	static final int IMAGE_WIDTH = 600;
@@ -80,54 +82,54 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	// 每张图里有几个点
 	static final int DOTS = 5;
 	static final int DOTS_UAT = 5;
-	static final int PICS = 5;
 	// 结果的角度总数，5个点的话就是10个。每张图。
 	static final int ANGLES = DOTS * (DOTS - 1) / 2;
 
 	// 每组随机抽到的图片编号，对应每一组
-	static int chosenPic[][] = new int[GROUPS][PIC_PER_GROUP];
+	static int chosenPic[][] = new int[GROUPS][PICS];
 	static List<Integer> chosenPicPerGroupOne = new ArrayList<Integer>();
 	static List<Integer> chosenPicPerGroupTwo = new ArrayList<Integer>();
 	static List<Integer> chosenPicPerGroupThree = new ArrayList<Integer>();
 
 	// 输入的X，Y点坐标，对应每一组，每张图，每个点
-	static Double inputX[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
-	static Double inputY[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
+	static Double inputX[][][] = new Double[GROUPS][PICS][DOTS];
+	static Double inputY[][][] = new Double[GROUPS][PICS][DOTS];
 	// 每张图的旋转角度，对应每一组，每张图
-	static Double radian[][] = new Double[GROUPS][PIC_PER_GROUP];
+	static Double radian[][] = new Double[GROUPS][PICS];
 	// 输入的X，Y点坐标转换后对应的极坐标，对应每一组，每张图，每个点
-	static Double inputP[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
-	static Double inputRa[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
+	static Double inputP[][][] = new Double[GROUPS][PICS][DOTS];
+	static Double inputRa[][][] = new Double[GROUPS][PICS][DOTS];
 	// 输出的X，Y点坐标，对应每一组，每张图，每个点
-	static Double outputX[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
-	static Double outputY[][][] = new Double[GROUPS][PIC_PER_GROUP][DOTS];
-	// 最终的角度，对应每一组，每张图，每个角度
-	static Double finalAngle[][][] = new Double[GROUPS][PIC_PER_GROUP][ANGLES];
-	static String finalAngleStr[][][] = new String[GROUPS][PIC_PER_GROUP][ANGLES];
+	static Double outputX[][][] = new Double[GROUPS][PICS][DOTS];
+	static Double outputY[][][] = new Double[GROUPS][PICS][DOTS];
+	// 最终的角度，直角坐标。对应每一组，每张图，每个角度
+	static Double finalAngle[][][] = new Double[GROUPS][PICS][ANGLES];
+	static String finalAngleStr[][][] = new String[GROUPS][PICS][ANGLES];
 
-	static int group = 0; // 记录当前是在测试第几组
-	static int pic = 0; // 记录当前是在测试组里的第几个图
+	static int currntGroup = 0; // 记录当前是在测试第几组
+	static int currntPic = 0; // 记录当前是在测试组里的第几个图
+	static int picToImage = 0; // 记录当前序号是图库离的第几张图
 	// 测试第一组，对应每张图，每个点
-	Double dotsXInputGroupOne[][] = new Double[PIC_PER_GROUP][DOTS];
-	Double dotsXInputGroupTwo[][] = new Double[PIC_PER_GROUP][DOTS];
-	Double dotsXInputGroupThree[][] = new Double[PIC_PER_GROUP][DOTS];
-	Double dotsYInputGroupOne[][] = new Double[PIC_PER_GROUP][DOTS];
-	Double dotsYInputGroupTwo[][] = new Double[PIC_PER_GROUP][DOTS];
-	Double dotsYInputGroupThree[][] = new Double[PIC_PER_GROUP][DOTS];
+	Double dotsXInputGroupOne[][] = new Double[PICS][DOTS];
+	Double dotsXInputGroupTwo[][] = new Double[PICS][DOTS];
+	Double dotsXInputGroupThree[][] = new Double[PICS][DOTS];
+	Double dotsYInputGroupOne[][] = new Double[PICS][DOTS];
+	Double dotsYInputGroupTwo[][] = new Double[PICS][DOTS];
+	Double dotsYInputGroupThree[][] = new Double[PICS][DOTS];
 	// 测试里面的坐标使用极坐标存储
-	Double dotsPRadiusGroupOne[][] = new Double[PIC_PER_GROUP][DOTS * PICS];
-	Double dotsPAngleGroupOne[][] = new Double[PIC_PER_GROUP][DOTS * PICS];
+	Double dotsPRadiusGroupOne[][] = new Double[PICS][DOTS * PICS];
+	Double dotsPAngleGroupOne[][] = new Double[PICS][DOTS * PICS];
 
 	// 图片文件位置
-	String inputPathImageGroup[][] = new String[GROUPS][PIC_PER_GROUP];
+	String inputPathImageGroup[][];
 
-	// String ImageNumber[][] = new String[GROUP_NUMBER][TEST_PER_GROUP];
-	Image image[][] = new Image[GROUPS][PIC_PER_GROUP];
+	// 图片，对应每个组，每张图
+	Image image[][] = new Image[GROUPS][PICS];
 	// 存放图片中旋转角度信息
-	Double rotateAngle[][] = new Double[GROUPS][PIC_PER_GROUP];
+	Double rotateAngle[][] = new Double[GROUPS][PICS];
 
 	// 存放结果的角度
-	Double resultAngleGroupOne[][] = new Double[PIC_PER_GROUP][ANGLES];
+	Double resultAngleGroupOne[][] = new Double[PICS][ANGLES];
 
 	// 存放结果的文件，以及列与行的坐标
 	static String outputFileName = "";
@@ -145,21 +147,48 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	public TestView() {
 		initial();
 		readInput();
-		// covertToPolar();
-		// showPage();
-		// calculateRa();
-		// convertToCC();
-		// calResult();
+		covertToPolar();
+		showPage();
+		calculateRa();
+//		convertToCC();
+//		calResult();
 	}
 
 	private void calResult() {
-		// TODO Auto-generated method stub
+		// TODO 根据最终的直角坐标，计算与中垂线的夹角
+		AngleCalAction aca = new AngleCalAction();
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PICS; j++) {
+				int angleCount = 0;
+				for (int k1 = 0; k1 < DOTS; k1++) {
+					for (int k2 = k1 + 1; k2 < DOTS; k2++) {
+						finalAngle[i][j][angleCount] = aca.calAngleWithVertiLine(outputX[i][j][k1], outputY[i][j][k1], outputX[i][j][k2], outputY[i][j][k2]);
+						System.out.println("group " + i + " pic " + j + " dot " + k1 + " and " + k2 + " has an anlge of " + finalAngle[i][j][angleCount]);
+						angleCount++;
+					}
+				}
+			}
+		}
 
 	}
 
 	private void convertToCC() {
-		// TODO Auto-generated method stub
-
+		// TODO 将实验中的弧度全部转化为角度
+		AngleCalAction aca = new AngleCalAction();
+		LogAction la = new LogAction();
+		String stdMsg = "";
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PICS; j++) {
+				for (int k = 0; k < DOTS; k++) {
+					outputX[i][j][k] = aca.getXFromPolar(inputP[i][j][k], inputRa[i][j][k]);
+					outputY[i][j][k] = aca.getYFromPolar(inputP[i][j][k], inputRa[i][j][k]);
+					stdMsg = "PolarToCC: group " + (i + 1) + " pic " + (j + 1) + " dot " + (k + 1) + ", X is " + outputX[i][j][k] + ", Y is " + outputY[i][j][k];
+					la.logStd("Info", stdMsg);
+				}
+			}
+		}
+		
+		calResult();
 	}
 
 	private void calculateRa() {
@@ -168,7 +197,20 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	}
 
 	private void covertToPolar() {
-		// TODO Auto-generated method stub
+		// TODO 把输入的直角坐标转换成极坐标并用在测试中
+		AngleCalAction aca = new AngleCalAction();
+		LogAction la = new LogAction();
+		String stdMsg = "";
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PICS; j++) {
+				for (int k = 0; k < DOTS; k++) {
+					inputP[i][j][k] = aca.getPolarRadiusFromRightAngel(inputX[i][j][k], inputY[i][j][k]);
+					inputRa[i][j][k] = aca.getPolarAngleFromRightAngel(inputX[i][j][k], inputY[i][j][k]);
+					stdMsg = "CCToPolar: group " + (i + 1) + " pic " + (j + 1) + " dot " + (k + 1) + ", P is " + inputP[i][j][k] + ", Ra is " + inputRa[i][j][k];
+					la.logStd("Info", stdMsg);
+				}
+			}
+		}
 
 	}
 
@@ -179,14 +221,14 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		la.logStd("Info", "Read input text.");
 
 		// 读取点的坐标信息
-		group = 0;
+		currntGroup = 0;
 		// 读取选中的图片编号
 		FileIOAction fa = new FileIOAction();
 		dotsXInputGroupOne = fa.readInputX(0, chosenPicPerGroupOne);
 		dotsYInputGroupOne = fa.readInputY(0, chosenPicPerGroupOne);
 		stdMsg = "";
 		for (int i = 0; i < PICS; i++) {
-			la.logStd("Info", "Input for group " + (group + 1) + " pic " + (i + 1));
+			la.logStd("Info", "Input for group " + (currntGroup + 1) + " pic " + (i + 1));
 			chosenPic[0][i] = chosenPicPerGroupOne.get(i);
 			stdMsg = "";
 			for (int j = 0; j < DOTS; j++) {
@@ -198,13 +240,13 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 			la.logStd("Info", stdMsg);
 		}
 
-		group = 1;
+		currntGroup = 1;
 		// 读取选中的图片编号
 		dotsXInputGroupTwo = fa.readInputX(1, chosenPicPerGroupTwo);
 		dotsYInputGroupTwo = fa.readInputY(1, chosenPicPerGroupTwo);
 		stdMsg = "";
 		for (int i = 0; i < PICS; i++) {
-			la.logStd("Info", "Input for group " + (group + 1) + " pic " + (i + 1));
+			la.logStd("Info", "Input for group " + (currntGroup + 1) + " pic " + (i + 1));
 			chosenPic[1][i] = chosenPicPerGroupTwo.get(i);
 			stdMsg = "";
 			for (int j = 0; j < DOTS; j++) {
@@ -216,13 +258,13 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 			la.logStd("Info", stdMsg);
 		}
 
-		group = 2;
+		currntGroup = 2;
 		// 读取选中的图片编号
 		dotsXInputGroupThree = fa.readInputX(2, chosenPicPerGroupThree);
 		dotsYInputGroupThree = fa.readInputY(2, chosenPicPerGroupThree);
 		stdMsg = "";
 		for (int i = 0; i < PICS; i++) {
-			la.logStd("Info", "Input for group " + (group + 1) + " pic " + (i + 1));
+			la.logStd("Info", "Input for group " + (currntGroup + 1) + " pic " + (i + 1));
 			chosenPic[2][i] = chosenPicPerGroupThree.get(i);
 			stdMsg = "";
 			for (int j = 0; j < DOTS; j++) {
@@ -246,7 +288,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		create = false;
 		// TODO 输出随机选择后每张图片的点，到Excel
 		for (int i = 0; i < GROUPS; i++) {
-			for (int j = 0; j < PICS; j++) {				
+			for (int j = 0; j < PICS; j++) {
 				for (int k = 0; k < DOTS; k++) {
 					// 输出每张图的点
 					outputMsg = String.valueOf(inputX[i][j][k]) + ", " + String.valueOf(inputY[i][j][k]);
@@ -277,16 +319,22 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		outputFile = new File("C:/hptest/output/result_output/" + outputFileName);
 		rowStart = 0;
 
+		DirectoryAction da = new DirectoryAction();
+		picNumInFile = da.getFileAmount(1);
+
 		// 初始化图片的路径
+		inputPathImageGroup = new String[GROUPS][picNumInFile];
 		for (int i = 0; i < GROUPS; i++) {
-			for (int j = 0; j < PIC_PER_GROUP; j++) {
+			for (int j = 0; j < picNumInFile; j++) {
 				inputPathImageGroup[i][j] = "C:/hptest/input/images/group" + (i + 1) + "/" + (j + 1) + ".jpg";
+				// image[i][j] = new
+				// ImageIcon(inputPathImageGroup[i][j]).getImage();
 			}
 		}
 
 		// 初始化角度
 		for (int i = 0; i < GROUPS; i++) {
-			for (int j = 0; j < PIC_PER_GROUP; j++) {
+			for (int j = 0; j < PICS; j++) {
 				for (int k = 0; k < DOTS; k++) {
 					inputX[i][j][k] = 0.00;
 					inputY[i][j][k] = 0.00;
@@ -296,12 +344,14 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 					outputY[i][j][k] = 0.00;
 				}
 				radian[i][j] = 0.00;
+				rotateAngle[i][j] = 0.00;
 			}
+
 		}
 
 		// 初始化结果坐标
 		for (int i = 0; i < GROUPS; i++) {
-			for (int j = 0; j < PIC_PER_GROUP; j++) {
+			for (int j = 0; j < PICS; j++) {
 				for (int k = 0; k < ANGLES; k++) {
 					finalAngle[i][j][k] = 0.00;
 					finalAngleStr[i][j][k] = "";
@@ -334,7 +384,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		outputMsg = "";
 		create = false;
 		for (int i = 0; i < GROUPS; i++) {
-			for (int j = 0; j < PIC_PER_GROUP; j++) {
+			for (int j = 0; j < PICS; j++) {
 				outputMsg = String.valueOf(radian[i][j]);
 				try {
 					fa.writeExcel(outputFileName, column, row, outputMsg, create);
@@ -508,7 +558,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		// TODO 对每张选择的图片赋予一个随机角度
 		AngleCalAction aca = new AngleCalAction();
 		for (int i = 0; i < GROUPS; i++) {
-			for (int j = 0; j < PIC_PER_GROUP; j++) {
+			for (int j = 0; j < PICS; j++) {
 				radian[i][j] = Double.valueOf(aca.getRandomAngle());
 			}
 		}
@@ -521,11 +571,11 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		DirectoryAction da = new DirectoryAction();
 		int fileCount = 0, randomNum = 0;
 
-		group = 0;
-		fileCount = da.getFileAmount(group);
-		la.logStd("Info", "There are " + fileCount + " files in group " + (group + 1));
+		currntGroup = 0;
+		fileCount = da.getFileAmount(currntGroup);
+		la.logStd("Info", "There are " + fileCount + " files in group " + (currntGroup + 1));
 		chosenPicPerGroupOne = new ArrayList<Integer>();
-		for (int j = 0; j < PIC_PER_GROUP; j++) {
+		for (int j = 0; j < PICS; j++) {
 			randomNum = (int) (Math.random() * fileCount);
 			while (chosenPicPerGroupOne.contains(randomNum)) {
 				randomNum = (randomNum + 1) % fileCount;
@@ -533,22 +583,22 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 			chosenPicPerGroupOne.add(randomNum);
 		}
 		Collections.sort(chosenPicPerGroupOne);
-		for (int i = 0; i < PIC_PER_GROUP; i++) {
-			chosenPic[group][i] = chosenPicPerGroupOne.get(i);
+		for (int i = 0; i < PICS; i++) {
+			chosenPic[currntGroup][i] = chosenPicPerGroupOne.get(i);
 		}
-		
+
 		stdMsg = "";
-		stdMsg = "Random pic chosen for group " + (group + 1) + ": ";
+		stdMsg = "Random pic chosen for group " + (currntGroup + 1) + ": ";
 		for (int i : chosenPicPerGroupOne) {
 			stdMsg = stdMsg + (i + 1) + ", ";
 		}
 		la.logStd("Info", stdMsg);
 
-		group = 1;
-		fileCount = da.getFileAmount(group);
-		la.logStd("Info", "There are " + fileCount + " files in group " + (group + 1));
+		currntGroup = 1;
+		fileCount = da.getFileAmount(currntGroup);
+		la.logStd("Info", "There are " + fileCount + " files in group " + (currntGroup + 1));
 		chosenPicPerGroupTwo = new ArrayList<Integer>();
-		for (int j = 0; j < PIC_PER_GROUP; j++) {
+		for (int j = 0; j < PICS; j++) {
 			randomNum = (int) (Math.random() * fileCount);
 			while (chosenPicPerGroupTwo.contains(randomNum)) {
 				randomNum = (randomNum + 1) % fileCount;
@@ -556,21 +606,21 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 			chosenPicPerGroupTwo.add(randomNum);
 		}
 		Collections.sort(chosenPicPerGroupTwo);
-		for (int i = 0; i < PIC_PER_GROUP; i++) {
-			chosenPic[group][i] = chosenPicPerGroupTwo.get(i);
+		for (int i = 0; i < PICS; i++) {
+			chosenPic[currntGroup][i] = chosenPicPerGroupTwo.get(i);
 		}
 		stdMsg = "";
-		stdMsg = "Random pic chosen for group " + (group + 1) + ": ";
+		stdMsg = "Random pic chosen for group " + (currntGroup + 1) + ": ";
 		for (int i : chosenPicPerGroupTwo) {
 			stdMsg = stdMsg + (i + 1) + ", ";
 		}
 		la.logStd("Info", stdMsg);
 
-		group = 2;
-		fileCount = da.getFileAmount(group);
-		la.logStd("Info", "There are " + fileCount + " files in group " + (group + 1));
+		currntGroup = 2;
+		fileCount = da.getFileAmount(currntGroup);
+		la.logStd("Info", "There are " + fileCount + " files in group " + (currntGroup + 1));
 		chosenPicPerGroupThree = new ArrayList<Integer>();
-		for (int j = 0; j < PIC_PER_GROUP; j++) {
+		for (int j = 0; j < PICS; j++) {
 			randomNum = (int) (Math.random() * fileCount);
 			while (chosenPicPerGroupThree.contains(randomNum)) {
 				randomNum = (randomNum + 1) % fileCount;
@@ -578,11 +628,11 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 			chosenPicPerGroupThree.add(randomNum);
 		}
 		Collections.sort(chosenPicPerGroupThree);
-		for (int i = 0; i < PIC_PER_GROUP; i++) {
-			chosenPic[group][i] = chosenPicPerGroupThree.get(i);
+		for (int i = 0; i < PICS; i++) {
+			chosenPic[currntGroup][i] = chosenPicPerGroupThree.get(i);
 		}
 		stdMsg = "";
-		stdMsg = "Random pic chosen for group " + (group + 1) + ": ";
+		stdMsg = "Random pic chosen for group " + (currntGroup + 1) + ": ";
 		for (int i : chosenPicPerGroupThree) {
 			stdMsg = stdMsg + (i + 1) + ", ";
 		}
@@ -609,18 +659,18 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 		Font fontForFillingText = new Font("TimesRoman", Font.PLAIN, 30);
 
-		// 全局变量
-		image[group][pic] = new ImageIcon(inputPathImageGroup[group][pic]).getImage();
-
 		// 设置左边的面板
 		jpTestLeft = new JPanel();
 		jpTestLeft.setSize(IMAGE_WIDTH, IMAGE_HEGHT);
 		rv = new RotateView();
 		// jpTestLeft.add(rv);
 		DirectoryAction da = new DirectoryAction();
-		File inputText = new File(inputPathImageGroup[group][pic]);
-		System.out.println("image exist2: " + da.whetherDirectoryExists(inputText));
-		rv.image = new ImageIcon(inputPathImageGroup[group][pic]).getImage();
+		currntGroup = 0;
+		currntPic = 0;
+		// 真图的编号从1开始
+		picToImage = chosenPic[currntGroup][currntPic];
+		File inputImage = new File(inputPathImageGroup[currntGroup][picToImage]);
+		rv.image = new ImageIcon(inputPathImageGroup[currntGroup][picToImage]).getImage();
 		rv.repaint();
 		jpTestLeft.setBackground(Color.RED);
 
@@ -740,15 +790,14 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		System.out.println("jpbase height: " + jpBase.getHeight());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		checkButtonAvailbility(testCount);
+		checkButtonAvailbility(currntGroup, currntPic);
 
 	}
 
-	private void checkButtonAvailbility(int testCount2) {
+	private void checkButtonAvailbility(int currentGroup, int currentPic) {
 		// TODO Auto-generated method stub
-		System.out.println("Entered into checkButtonAvailbility");
-		System.out.println("testCount: " + testCount);
-		if (0 == testCount) {
+		System.out.println("checkButtonAvailbility group: " + currentGroup + ", pic: " + currentPic);
+		if (0 == currentGroup && 0 == currentPic) {
 			// 第一张图片没有上一张
 			jbPrev.setEnabled(false);
 
@@ -756,7 +805,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 			jbPrev.setEnabled(true);
 		}
 
-		if (FULL_TEST_AMOUNT == testCount + 1) {
+		if (GROUPS - 1 == currentGroup && PICS - 1 == currentPic) {
 			// 最后一张图片结束后是结束测试的按钮
 			jbNext.setText("结束测试");
 		} else {
@@ -774,75 +823,53 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 		// 如果用户在欢迎界面单击"开始测试"，则转到准备界面
 		if (e.getSource() == jbNext) {
+			System.out.println("Next pic");
+			currntPic++;
 
-			if (FULL_TEST_AMOUNT == testCount + 1) {
+			if (currntGroup == GROUPS - 1 && currntPic == PICS) {
 				// 最后一张图片结束后是结束测试的按钮
 				int replaced = JOptionPane.showConfirmDialog(null, "确认结束测试？", "测试即将结束", JOptionPane.YES_NO_OPTION);
 				switch (replaced) {
 				// 如果选择了“Yes”
 				case JOptionPane.YES_OPTION:
 					System.out.println("Yes is chosen");
-					sumupRotateAngle();
-					calVeriticalAngle();
+					// 退出测试界面，开始计算结果
+					frame.setVisible(false);
+					convertToCC();
 					break;
 				default:
 					System.out.println("Others is chosen");
 					break;
 				}
 			} else {
-
-				testCount++;
-				System.out.println("testCount: " + testCount);
-				checkButtonAvailbility(testCount);
-
-				System.out.println("Saving angle info Pic.");
-				System.out.println("group: " + group + ", pic: " + pic);
+				checkButtonAvailbility(currntGroup, currntPic);
 				System.out.println(rv.getXuanzhuan());
-				// rotateAngle[group][pic] = rv.getXuanzhuan();
-
-				System.out.println("Next Pic.");
 				rollOverPicNumber(1);
-				System.out.println("group: " + group + ", pic: " + pic);
-				rv.image = new ImageIcon(inputPathImageGroup[group][pic]).getImage();
+				rv.image = new ImageIcon(inputPathImageGroup[currntGroup][picToImage]).getImage();
 				DirectoryAction da = new DirectoryAction();
-				File inputText = new File(inputPathImageGroup[group][pic]);
+				File inputText = new File(inputPathImageGroup[currntGroup][picToImage]);
 				System.out.println("image exist2: " + da.whetherDirectoryExists(inputText));
-				rv.setXuanzhuan(-rotateAngle[group][pic]);
+				rv.setXuanzhuan(-rotateAngle[currntGroup][currntPic]);
 				rv.repaint();
 			}
 		} else if (e.getSource() == jbPrev) {
-
-			testCount--;
-
-			System.out.println("testCount: " + testCount);
-			checkButtonAvailbility(testCount);
-
-			System.out.println("Saving angle info Pic.");
-			// rotateAngle[group][pic] = rv.getXuanzhuan();
-
-			System.out.println("Prev Pic.");
+			System.out.println("Prev pic");
+			currntPic--;
+			checkButtonAvailbility(currntGroup, currntPic);
 			rollOverPicNumber(-1);
-			rv.image = new ImageIcon(inputPathImageGroup[group][pic]).getImage();
+			rv.image = new ImageIcon(inputPathImageGroup[currntGroup][picToImage]).getImage();
 			DirectoryAction da = new DirectoryAction();
-			File inputText = new File(inputPathImageGroup[group][pic]);
+			File inputText = new File(inputPathImageGroup[currntGroup][picToImage]);
 			System.out.println("image exist2: " + da.whetherDirectoryExists(inputText));
-			rv.setXuanzhuan(-rotateAngle[group][pic]);
+			rv.setXuanzhuan(-rotateAngle[currntGroup][currntPic]);
 			rv.repaint();
 		} else if (jbBigLeft == e.getSource()) {
 
 			System.out.println("Turn left by 10");
-			// String inputPath2 = "C:/hptest/input/images/group1/3.jpg";
-			// File inputText = new File(inputPath2);
-			//
-			// rv.image = new ImageIcon(inputPath2).getImage();
-			// DirectoryAction da = new DirectoryAction();
-			// System.out.println("image exist2: "
-			// + da.whetherDirectoryExists(inputText));
-			System.out.println("Rotating group " + group + " pic " + pic + " by +10 degrees.");
-			// rotateAngle[group][pic] = rv.getXuanzhuan();
-			rotateAngle[group][pic] += Math.PI / 18;
+			System.out.println("Rotating group " + currntGroup + " pic " + currntPic + " by +10 degrees.");
+			rotateAngle[currntGroup][currntPic] += Math.PI / 18;
 			// 旋转和角度计算方向相反
-			rv.setXuanzhuan(-rotateAngle[group][pic]);
+			rv.setXuanzhuan(-rotateAngle[currntGroup][currntPic]);
 			rv.repaint();
 		} else if (jbBigRight == e.getSource()) {
 
@@ -854,11 +881,11 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 			// DirectoryAction da = new DirectoryAction();
 			// System.out.println("image exist2: "
 			// + da.whetherDirectoryExists(inputText));
-			System.out.println("Rotating group " + group + " pic " + pic + " by -10 degrees.");
+			System.out.println("Rotating group " + currntGroup + " pic " + currntPic + " by -10 degrees.");
 			// rotateAngle[group][pic] = rv.getXuanzhuan();
-			rotateAngle[group][pic] -= Math.PI / 18;
+			rotateAngle[currntGroup][currntPic] -= Math.PI / 18;
 			// 旋转和角度计算方向相反
-			rv.setXuanzhuan(-rotateAngle[group][pic]);
+			rv.setXuanzhuan(-rotateAngle[currntGroup][currntPic]);
 			rv.repaint();
 		}
 
@@ -876,7 +903,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	private void sumupRotateAngle() {
 		// TODO 在结束测试之后汇总旋转的角度
 		for (int i = 0; i < GROUPS; i++) {
-			for (int j = 0; j < PIC_PER_GROUP; j++) {
+			for (int j = 0; j < PICS; j++) {
 				while (rotateAngle[i][j] < 0.00) {
 					rotateAngle[i][j] += (2 * Math.PI);
 				}
@@ -886,10 +913,10 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 		// 将rotateAngle 一组一组的转入 Polar Angle
 		AngleCalAction aca = new AngleCalAction();
-		for (int i = 0; i < PIC_PER_GROUP; i++) {
+		for (int i = 0; i < PICS; i++) {
 			for (int j = 0; j < DOTS * PICS; j++) {
 				// 转换角度为弧度
-				dotsPAngleGroupOne[i][j] = aca.angleToRadians(rotateAngle[0][i]);
+				dotsPAngleGroupOne[i][j] = aca.angleToRadian(rotateAngle[0][i]);
 				System.out.println("dotsPAngleGroupOne[" + i + "][" + j + "]: " + dotsPAngleGroupOne[i][j]);
 			}
 		}
@@ -898,15 +925,18 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	private void rollOverPicNumber(int roll) {
 		// TODO 当用户点击“上一张”或者“下一张”时，测试图片的编号对应的往后或者往前。
-		pic += roll;
-		if (pic < 0) {
-			group--;
-			pic += PIC_PER_GROUP;
+		// pic 和 group 的取值范围是0~length-1
+		if (currntPic < 0) {
+			currntGroup--;
+			currntPic += PICS;
 		}
-		if (pic > PIC_PER_GROUP) {
-			group++;
-			pic -= PIC_PER_GROUP;
+		if (currntPic > PICS - 1) {
+			currntGroup++;
+			currntPic -= PICS;
 		}
+		picToImage = chosenPic[currntGroup][currntPic];
+		System.out.println("rolled over group: " + currntGroup + ", pic: " + currntPic);
+		System.out.println("mapped image: " + currntGroup + ", pic: " + picToImage);
 
 	}
 
