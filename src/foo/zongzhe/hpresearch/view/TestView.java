@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -150,8 +151,8 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		covertToPolar();
 		showPage();
 		calculateRa();
-//		convertToCC();
-//		calResult();
+		// convertToCC();
+		// calResult();
 	}
 
 	private void calResult() {
@@ -169,7 +170,36 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 				}
 			}
 		}
+		outputResultToExcel();
 
+	}
+
+	private void outputResultToExcel() {
+		// TODO 将最终结果输出到Excel
+		FileIOAction fa = new FileIOAction();
+		column = 10;
+		row = rowStart;
+		outputMsg = "";
+		create = false;
+
+		for (int i = 0; i < GROUPS; i++) {
+			for (int j = 0; j < PICS; j++) {
+				for (int k = 0; k < ANGLES; k++) {
+					DecimalFormat df = new DecimalFormat("####0.00");
+					outputMsg =df.format(finalAngle[i][j][k]);
+					try {
+						fa.writeExcel(outputFileName, column + k, row, outputMsg, create);
+					} catch (RowsExceededException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (WriteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				row++;
+			}
+		}
 	}
 
 	private void convertToCC() {
@@ -187,7 +217,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 				}
 			}
 		}
-		
+
 		calResult();
 	}
 
