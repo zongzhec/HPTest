@@ -95,8 +95,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	// 输入的X，Y点坐标，对应每一组，每张图，每个点
 	static Double inputX[][][] = new Double[GROUPS][PICS][DOTS];
 	static Double inputY[][][] = new Double[GROUPS][PICS][DOTS];
-	// 每张图的旋转角度，对应每一组，每张图
-	static Double radian[][] = new Double[GROUPS][PICS];
+
 	// 输入的X，Y点坐标转换后对应的极坐标，对应每一组，每张图，每个点
 	static Double inputP[][][] = new Double[GROUPS][PICS][DOTS];
 	static Double inputRa[][][] = new Double[GROUPS][PICS][DOTS];
@@ -129,9 +128,6 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	// 存放图片中旋转角度信息
 	Double rotateAngle[][] = new Double[GROUPS][PICS];
 
-	// 存放结果的角度
-	Double resultAngleGroupOne[][] = new Double[PICS][ANGLES];
-
 	// 存放结果的文件，以及列与行的坐标
 	static String outputFileName = "";
 	static File outputFile;
@@ -141,6 +137,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	static int row;
 	static String outputMsg;
 	boolean create = true;
+	boolean test = true;
 
 	// 用于输出到log
 	String stdMsg = "";
@@ -150,9 +147,6 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		readInput();
 		covertToPolar();
 		showPage();
-		calculateRa();
-		// convertToCC();
-		// calResult();
 	}
 
 	private void calResult() {
@@ -174,6 +168,18 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	}
 
+	private void testMode() {
+		// TODO 仅供测试
+		if (test) {
+			rotateAngle[0][0] = 30.0 * Math.PI / 180;
+			rotateAngle[0][1] = -15.0 * Math.PI / 180;
+			rotateAngle[0][2] = 5.0 * Math.PI / 180;
+			rotateAngle[0][3] = -23.0 * Math.PI / 180;
+			rotateAngle[0][4] = 10.0 * Math.PI / 180;
+		}
+
+	}
+
 	private void outputResultToExcel() {
 		// TODO 将最终结果输出到Excel
 		FileIOAction fa = new FileIOAction();
@@ -181,12 +187,26 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		row = rowStart;
 		outputMsg = "";
 		create = false;
+		DecimalFormat df = new DecimalFormat("####0.00");
+		AngleCalAction aca = new AngleCalAction();
 
 		for (int i = 0; i < GROUPS; i++) {
 			for (int j = 0; j < PICS; j++) {
+				column = 4;
+				double angle = aca.radianToCCAngle(-rotateAngle[i][j]);
+				outputMsg = df.format(angle);
+				try {
+					fa.writeExcel(outputFileName, column, row, outputMsg, create);
+				} catch (RowsExceededException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (WriteException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				column = 10;
 				for (int k = 0; k < ANGLES; k++) {
-					DecimalFormat df = new DecimalFormat("####0.00");
-					outputMsg =df.format(finalAngle[i][j][k]);
+					outputMsg = df.format(finalAngle[i][j][k]);
 					try {
 						fa.writeExcel(outputFileName, column + k, row, outputMsg, create);
 					} catch (RowsExceededException e) {
@@ -204,6 +224,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	private void convertToCC() {
 		// TODO 将实验中的弧度全部转化为角度
+		// 仅供测试
 		AngleCalAction aca = new AngleCalAction();
 		LogAction la = new LogAction();
 		String stdMsg = "";
@@ -219,11 +240,6 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		}
 
 		calResult();
-	}
-
-	private void calculateRa() {
-		// TODO Auto-generated method stub
-
 	}
 
 	private void covertToPolar() {
@@ -373,7 +389,6 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 					outputX[i][j][k] = 0.00;
 					outputY[i][j][k] = 0.00;
 				}
-				radian[i][j] = 0.00;
 				rotateAngle[i][j] = 0.00;
 			}
 
@@ -415,7 +430,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		create = false;
 		for (int i = 0; i < GROUPS; i++) {
 			for (int j = 0; j < PICS; j++) {
-				outputMsg = String.valueOf(radian[i][j]);
+				outputMsg = String.valueOf(-rotateAngle[i][j]);
 				try {
 					fa.writeExcel(outputFileName, column, row, outputMsg, create);
 					row++;
@@ -589,7 +604,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		AngleCalAction aca = new AngleCalAction();
 		for (int i = 0; i < GROUPS; i++) {
 			for (int j = 0; j < PICS; j++) {
-				radian[i][j] = Double.valueOf(aca.getRandomAngle());
+				rotateAngle[i][j] = Double.valueOf(aca.getRandomAngle());
 			}
 		}
 
@@ -739,7 +754,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 		gridJpRightY++;
 		gridJpRightX = 0;
-		jbBigLeft = new JButton("左转10°");
+		jbBigLeft = new JButton("大幅左转");
 		jbBigLeft.setFont(fontForFillingText);
 		gbcJpRight.gridwidth = 1;
 		gbcJpRight.gridx = gridJpRightX;
@@ -748,7 +763,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		jpTestRight.add(jbBigLeft, gbcJpRight);
 
 		gridJpRightX++;
-		jbBigRight = new JButton("右转10°");
+		jbBigRight = new JButton("大幅右转");
 		jbBigRight.setFont(fontForFillingText);
 		gbcJpRight.gridx = gridJpRightX;
 		gbcJpRight.gridy = gridJpRightY;
@@ -766,7 +781,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 		gridJpRightX = 0;
 		gridJpRightY++;
-		jbSmallLeft = new JButton("左转1° ");
+		jbSmallLeft = new JButton("小幅左转");
 		jbSmallLeft.setFont(fontForFillingText);
 		gbcJpRight.gridwidth = 1;
 		gbcJpRight.gridx = gridJpRightX;
@@ -775,7 +790,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		jpTestRight.add(jbSmallLeft, gbcJpRight);
 
 		gridJpRightX++;
-		jbSmallRight = new JButton("右转1° ");
+		jbSmallRight = new JButton("小幅右转");
 		jbSmallRight.setFont(fontForFillingText);
 		gbcJpRight.gridx = gridJpRightX;
 		gbcJpRight.gridy = gridJpRightY;
@@ -865,7 +880,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 					System.out.println("Yes is chosen");
 					// 退出测试界面，开始计算结果
 					frame.setVisible(false);
-					convertToCC();
+					sumupRotateAngle();
 					break;
 				default:
 					System.out.println("Others is chosen");
@@ -932,25 +947,15 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	private void sumupRotateAngle() {
 		// TODO 在结束测试之后汇总旋转的角度
+		// 即，每个点在转换成极坐标之后，本身就带有一个旋转角度inputRa[i][j][k]，现在将用户人为旋转的角度叠加在上面
 		for (int i = 0; i < GROUPS; i++) {
 			for (int j = 0; j < PICS; j++) {
-				while (rotateAngle[i][j] < 0.00) {
-					rotateAngle[i][j] += (2 * Math.PI);
+				for (int k = 0; k < DOTS; k++) {
+					inputRa[i][j][k] += -rotateAngle[i][j];
 				}
-				rotateAngle[i][j] = rotateAngle[i][j] % (2 * Math.PI);
 			}
 		}
-
-		// 将rotateAngle 一组一组的转入 Polar Angle
-		AngleCalAction aca = new AngleCalAction();
-		for (int i = 0; i < PICS; i++) {
-			for (int j = 0; j < DOTS * PICS; j++) {
-				// 转换角度为弧度
-				dotsPAngleGroupOne[i][j] = aca.angleToRadian(rotateAngle[0][i]);
-				System.out.println("dotsPAngleGroupOne[" + i + "][" + j + "]: " + dotsPAngleGroupOne[i][j]);
-			}
-		}
-
+		convertToCC();
 	}
 
 	private void rollOverPicNumber(int roll) {

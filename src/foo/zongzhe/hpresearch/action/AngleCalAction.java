@@ -88,8 +88,13 @@ public class AngleCalAction {
 		angle = aca.radianToCCAngle(angle);
 
 		// 处理一些角度>180°的情况
-		while (Math.abs(angle) > 180) {
-			angle = Math.abs(angle - 180);
+		while (angle > 180) {
+			angle = angle - 180;
+		}
+
+		// 处理一些角度<0°的情况
+		while (angle < 0) {
+			angle = angle + 180;
 		}
 
 		return angle;
