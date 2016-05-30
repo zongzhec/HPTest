@@ -28,6 +28,8 @@ public class FileIOAction {
 	static final int PIC_PER_GROUP = 5;
 	static final int DOTS = 5;
 	static String INPUT_PATH_TEXT[] = new String[3];
+	// OFFSET 是初始坐标原点和实际旋转中心的偏差
+	static final double OFFSET = 900.0;
 
 	public static void main(String[] args) {
 		// TODO 进行文件的读写操作
@@ -169,7 +171,7 @@ public class FileIOAction {
 						str = br.readLine();
 						String[] dotsStr = str.split(" ");
 						for (int j = 0; j < dotsStr.length; j = j + 2) {
-							inputX[pic][dot] = Double.valueOf(dotsStr[j]);
+							inputX[pic][dot] = Double.valueOf(dotsStr[j]) - OFFSET;
 							dot++;
 						}
 						pic++;
@@ -218,7 +220,7 @@ public class FileIOAction {
 						str = br.readLine();
 						String[] dotsStr = str.split(" ");
 						for (int j = 1; j < dotsStr.length; j = j + 2) {
-							inputY[pic][dot] = Double.valueOf(dotsStr[j]);
+							inputY[pic][dot] = Double.valueOf(dotsStr[j]) - OFFSET;
 							dot++;
 						}
 						pic++;

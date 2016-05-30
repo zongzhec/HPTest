@@ -143,9 +143,12 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 	String stdMsg = "";
 
 	public TestView() {
+		PreWelcomeView preWelView = new PreWelcomeView();
+		preWelView.showPage("正在处理文件");
 		initial();
 		readInput();
 		covertToPolar();
+		preWelView.hidePage();
 		showPage();
 	}
 
@@ -180,8 +183,15 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	}
 
+	public void ProcessView() {
+
+	}
+
 	private void outputResultToExcel() {
 		// TODO 将最终结果输出到Excel
+		AfterTestView atv = new AfterTestView();
+		atv.showPage("正在将结果写入文件");
+
 		FileIOAction fa = new FileIOAction();
 		column = 10;
 		row = rowStart;
@@ -193,7 +203,7 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		for (int i = 0; i < GROUPS; i++) {
 			for (int j = 0; j < PICS; j++) {
 				column = 4;
-				double angle = aca.radianToCCAngle(-rotateAngle[i][j]);
+				double angle = aca.radianToCCAngle(rotateAngle[i][j]);
 				outputMsg = df.format(angle);
 				try {
 					fa.writeExcel(outputFileName, column, row, outputMsg, create);
@@ -220,6 +230,8 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 				row++;
 			}
 		}
+		atv.hidePage();
+		System.exit(0);
 	}
 
 	private void convertToCC() {
@@ -257,7 +269,6 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 				}
 			}
 		}
-
 	}
 
 	private void readInput() {
@@ -356,7 +367,19 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	public void initial() {
 
+		DirectoryAction da = new DirectoryAction();
+		File dir = new File("C:/hpresearch/");
+		String ErrorMsg = "";
+		if (!da.whetherDirectoryExists(dir)) {
+			da.createDir(dir);
+		}
+
 		LogAction la = new LogAction();
+		la.logStd("Info", "------------------------New Run--------------------------------");
+		la.logStd("Info", "Link Start!");
+
+		boolean itWorks = true;
+
 		la.logStd("Info", "---Test View---");
 		la.logStd("Info", "Initializing test view.");
 		SimpleDateFormat dfFileName = new SimpleDateFormat("yyyyMMdd");
@@ -365,7 +388,6 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		outputFile = new File("C:/hptest/output/result_output/" + outputFileName);
 		rowStart = 0;
 
-		DirectoryAction da = new DirectoryAction();
 		picNumInFile = da.getFileAmount(1);
 
 		// 初始化图片的路径
@@ -402,6 +424,11 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 					finalAngleStr[i][j][k] = "";
 				}
 			}
+		}
+
+		if (!itWorks) {
+			la.logStd("ERROR", ErrorMsg);
+			System.exit(0);
 		}
 
 		// 输出Excel的框架信息
@@ -449,7 +476,6 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 
 	private void outputExcelRandomPic() {
 		// TODO 输出选中的图片，以及它们的点和初始坐标
-		LogAction la = new LogAction();
 		FileIOAction fa = new FileIOAction();
 		column = 1;
 		row = rowStart;
@@ -709,12 +735,10 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 		jpTestLeft.setSize(IMAGE_WIDTH, IMAGE_HEGHT);
 		rv = new RotateView();
 		// jpTestLeft.add(rv);
-		DirectoryAction da = new DirectoryAction();
 		currntGroup = 0;
 		currntPic = 0;
 		// 真图的编号从1开始
 		picToImage = chosenPic[currntGroup][currntPic];
-		File inputImage = new File(inputPathImageGroup[currntGroup][picToImage]);
 		rv.image = new ImageIcon(inputPathImageGroup[currntGroup][picToImage]).getImage();
 		rv.repaint();
 		jpTestLeft.setBackground(Color.RED);
@@ -910,38 +934,46 @@ public class TestView extends JFrame implements ActionListener, KeyListener {
 			rv.repaint();
 		} else if (jbBigLeft == e.getSource()) {
 
-			System.out.println("Turn left by 10");
-			System.out.println("Rotating group " + currntGroup + " pic " + currntPic + " by +10 degrees.");
-			rotateAngle[currntGroup][currntPic] += Math.PI / 18;
+			int randomRotateAngle = (int) (Math.random() * 5 + 8);
+			double rotatedAngle = Math.PI * randomRotateAngle / 180;
+			rotateAngle[currntGroup][currntPic] += rotatedAngle;
 			// 旋转和角度计算方向相反
+			System.out.println("Turn left by 10");
+			System.out.println("Rotating group " + currntGroup + " pic " + currntPic + " by +" + randomRotateAngle + " degrees.");
 			rv.setXuanzhuan(-rotateAngle[currntGroup][currntPic]);
 			rv.repaint();
 		} else if (jbBigRight == e.getSource()) {
 
-			System.out.println("Turn right by 10");
-			// String inputPath2 = "C:/hptest/input/images/group1/3.jpg";
-			// File inputText = new File(inputPath2);
-			//
-			// rv.image = new ImageIcon(inputPath2).getImage();
-			// DirectoryAction da = new DirectoryAction();
-			// System.out.println("image exist2: "
-			// + da.whetherDirectoryExists(inputText));
-			System.out.println("Rotating group " + currntGroup + " pic " + currntPic + " by -10 degrees.");
+			int randomRotateAngle = (int) (Math.random() * 5 + 8);
+			double rotatedAngle = Math.PI * randomRotateAngle / 180;
 			// rotateAngle[group][pic] = rv.getXuanzhuan();
-			rotateAngle[currntGroup][currntPic] -= Math.PI / 18;
+			rotateAngle[currntGroup][currntPic] -= rotatedAngle;
 			// 旋转和角度计算方向相反
+			System.out.println("Turn right by 10");
+			System.out.println("Rotating group " + currntGroup + " pic " + currntPic + " by -" + randomRotateAngle + " degrees.");
+			rv.setXuanzhuan(-rotateAngle[currntGroup][currntPic]);
+			rv.repaint();
+		} else if (jbSmallLeft == e.getSource()) {
+
+			int randomRotateAngle = (int) (Math.random() * 3 + 1);
+			double rotatedAngle = Math.PI * randomRotateAngle / 180;
+			rotateAngle[currntGroup][currntPic] += rotatedAngle;
+			// 旋转和角度计算方向相反
+			System.out.println("Turn left by 1");
+			System.out.println("Rotating group " + currntGroup + " pic " + currntPic + " by +" + randomRotateAngle + " degrees.");
+			rv.setXuanzhuan(-rotateAngle[currntGroup][currntPic]);
+			rv.repaint();
+		} else if (jbSmallRight == e.getSource()) {
+
+			int randomRotateAngle = (int) (Math.random() * 3 + 1);
+			double rotatedAngle = Math.PI * randomRotateAngle / 180;
+			rotateAngle[currntGroup][currntPic] -= rotatedAngle;
+			// 旋转和角度计算方向相反
+			System.out.println("Turn right by 1");
+			System.out.println("Rotating group " + currntGroup + " pic " + currntPic + " by -" + randomRotateAngle + " degrees.");
 			rv.setXuanzhuan(-rotateAngle[currntGroup][currntPic]);
 			rv.repaint();
 		}
-
-	}
-
-	private void calVeriticalAngle() {
-		// TODO 计算点两两相连后和中心线的夹角
-		for (int i = 0; i < ANGLES; i++) {
-			// Do something
-		}
-		// dotsPRadiusGroupOne resultAngleGroupOne
 
 	}
 

@@ -11,9 +11,11 @@ public class AngleTest {
 		// 1580。212 , 1588。1448 + -15 -> 165.3708413
 		// 528。576	436。1148 + 5 -> 175.8628
 		// 810。646	605。720 + -23 -> 86.8483
-		double x1 = 764.0, y1 = 84.0;
-		double x2 = 1420.0, y2 = 224.0;
-		double rotate = -30;
+		
+		// 400,514	818,554 + 90 -> 174.53379
+		double x1 = 400.0 - 900, y1 = 514.0 - 900;
+		double x2 = 818.0 - 900, y2 = 554.0 - 900;
+		double rotate = -90;
 		double p1 = Math.sqrt(Math.pow(x1, 2) + Math.pow(y1, 2));
 		double ra1 = Math.atan2(y1, x1);
 		double p2 = Math.sqrt(Math.pow(x2, 2) + Math.pow(y2, 2));

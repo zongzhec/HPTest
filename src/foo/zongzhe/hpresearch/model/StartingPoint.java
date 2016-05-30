@@ -38,7 +38,7 @@ public class StartingPoint {
 
 		// 显示准备界面
 		PreWelcomeView preWelView = new PreWelcomeView();
-		preWelView.showPage();
+		preWelView.showPage("正在读入数据");
 		
 		try
 
